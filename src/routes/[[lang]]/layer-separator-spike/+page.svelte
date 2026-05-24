@@ -71,7 +71,16 @@
 			const depthRaw = out.depth;
 			depthDims = { w: depthRaw.width, h: depthRaw.height };
 
-			const canvas = depthRaw.toCanvas();
+			// RawImage.toCanvas() may return OffscreenCanvas in transformers.js v3.
+			// Draw onto a regular HTMLCanvasElement so we can call .toBlob().
+			const src = depthRaw.toCanvas();
+			const canvas = document.createElement('canvas');
+			canvas.width = depthRaw.width;
+			canvas.height = depthRaw.height;
+			const ctx = canvas.getContext('2d');
+			if (!ctx) throw new Error('Could not get 2D context');
+			ctx.drawImage(src as unknown as CanvasImageSource, 0, 0);
+
 			await new Promise<void>((resolve) => {
 				canvas.toBlob((blob) => {
 					if (blob) {
