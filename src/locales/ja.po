@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-24T22:41:34.932Z\n"
-"PO-Revision-Date: 2025-11-16T01:53:16.199Z\n"
+"PO-Revision-Date: 2026-05-24T20:17:40.883Z\n"
 "Last-Translator: \n"
 "Language: ja\n"
 "Language-Team: \n"
@@ -107,6 +107,8 @@ msgstr "処理前"
 
 #: src/lib/components/background-remover/BackgroundRemoverResult.svelte
 #: src/lib/components/background-remover/BackgroundRemoverResult.svelte
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
 msgid "Original "
 msgstr "オリジナル "
 
@@ -470,6 +472,7 @@ msgstr "文字起こしモデルの読み込みに失敗しました。もう一
 #: src/lib/components/common/ErrorDisplay.svelte
 #: src/lib/components/whisper/WhisperModelSelector.svelte
 #: src/routes/[[lang]]/background-remover/+page.svelte
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
 #: src/routes/[[lang]]/text-to-speech/+page.svelte
 msgid "Retry"
 msgstr "再試行"
@@ -1612,3 +1615,54 @@ msgstr "ツール"
 #: src/routes/+layout.svelte
 msgid "More tools"
 msgstr "その他のツール"
+
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
+msgid "Layer Separator — Depth Spike"
+msgstr ""
+
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
+msgid ""
+"Phase 1 throwaway page. Loads <0/> via transformers.js and renders the raw depth\n"
+"map. Goal: eyeball whether Depth Anything V2 produces usable output on stylized ink landscapes before\n"
+"building the rest of the feature."
+msgstr ""
+
+#. placeholder {0}: loadProgress
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
+msgid "Loading model… {0}%"
+msgstr ""
+
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
+msgid "Model not loaded."
+msgstr ""
+
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
+msgid "Run on example (ink landscape)"
+msgstr ""
+
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
+msgid "Upload your own <0/>"
+msgstr ""
+
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
+msgid "Running depth estimation…"
+msgstr ""
+
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
+msgid "Depth map (white = near, black = far)"
+msgstr ""
+
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
+msgid "Depth map"
+msgstr ""
+
+#. placeholder {0}: depthDims.w
+#. placeholder {1}: depthDims.h
+#. placeholder {2}: processingMs
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
+msgid "{0} × {1} · {2}ms"
+msgstr ""
+
+#: src/routes/[[lang]]/layer-separator-spike/+page.svelte
+msgid "No depth map yet."
+msgstr ""
