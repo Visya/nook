@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T21:12:40.444Z\n"
-"PO-Revision-Date: 2026-05-31T09:28:20.439Z\n"
+"PO-Revision-Date: 2026-06-20T22:55:14.116Z\n"
 "Last-Translator: \n"
 "Language: sv\n"
 "Language-Team: \n"
@@ -1711,10 +1711,14 @@ msgstr ""
 msgid "Cumulative Masks"
 msgstr "Kumulativa masker"
 
-#~ msgid ""
-#~ "{0} mask{1} for {2} layers. Mask k is\n"
-#~ "BLACK where layers 1..k live; the frontmost layer has no mask."
-#~ msgstr ""
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#. placeholder {2}: layers.length
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"{0} mask{1} for {2} layers. Mask k is\n"
+"BLACK where layers 1..k live; the frontmost layer has no mask."
+msgstr ""
 
 #. placeholder {0}: i + 1
 #. placeholder {1}: i + 1
@@ -1735,24 +1739,19 @@ msgstr "Djuphistogram med dragbara lagertrösklar"
 msgid "Threshold {0}"
 msgstr "Tröskel {0}"
 
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid ""
-"Output is N-1 cumulative B&W masks at source resolution, ready to drop into Photoshop\n"
-"as layer masks."
-msgstr ""
-"Resultatet är N-1 kumulativa svartvita masker i källans upplösning,\n"
-"redo att användas som lagermasker i Photoshop."
+#~ msgid ""
+#~ "Output is N-1 cumulative B&W masks at source resolution, ready to drop into Photoshop\n"
+#~ "as layer masks."
+#~ msgstr ""
+#~ "Resultatet är N-1 kumulativa svartvita masker i källans upplösning,\n"
+#~ "redo att användas som lagermasker i Photoshop."
 
-#. placeholder {0}: masks.length
-#. placeholder {1}: masks.length === 1 ? '' : 's'
-#. placeholder {2}: layers.length
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid ""
-"{0} mask{1} for {2} layers. Mask k is BLACK\n"
-"where layers 1..k live; the frontmost layer has no mask."
-msgstr ""
-"{0} mask{1} för {2} lager. Mask k är SVART\n"
-"där lager 1..k finns; det främsta lagret saknar mask."
+#~ msgid ""
+#~ "{0} mask{1} for {2} layers. Mask k is BLACK\n"
+#~ "where layers 1..k live; the frontmost layer has no mask."
+#~ msgstr ""
+#~ "{0} mask{1} för {2} lager. Mask k är SVART\n"
+#~ "där lager 1..k finns; det främsta lagret saknar mask."
 
 #~ msgid "Click to pick an object"
 #~ msgstr ""
@@ -1951,3 +1950,56 @@ msgstr "Segmenterar objekt"
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "<0/> Segmenting…"
 msgstr "<0/> Segmenterar…"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Feather <0/> <1>{0}px</1>"
+msgstr "Ludd <0/> <1>{0}px</1>"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"Output is B&W masks at source resolution: N−1 cumulative masks for Photoshop, or N\n"
+"standalone per-band masks — your choice after upload."
+msgstr "Resultatet är svartvita masker i källupplösning: N−1 kumulativa masker för Photoshop, eller N fristående masker per lager – du väljer efter uppladdning."
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Isolated Masks"
+msgstr "Separata masker"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Mask output mode"
+msgstr "Maskutdataläge"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Cumulative"
+msgstr "Kumulativa"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "N−1 stacked cut masks for Photoshop"
+msgstr "N−1 staplade klippmasker för Photoshop"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Isolated"
+msgstr "Separata"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "N standalone per-band masks"
+msgstr "N fristående masker per lager"
+
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#. placeholder {2}: layers.length
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"{0} mask{1} for {2} layers. Each mask\n"
+"is WHITE for one band only — drop it straight onto a selection, no stacking needed."
+msgstr "{0} mask{1} för {2} lager. Varje mask är VIT för endast en banda – lägg den direkt på en markering, ingen stapling behövs."
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer {0} — this band only"
+msgstr "Lager {0} — endast denna banda"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Download layer {0}"
+msgstr "Ladda ner lager {0}"

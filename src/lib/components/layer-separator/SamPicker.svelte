@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { SamPoint } from '$lib/layer-separator/sam';
+	import { featherMask } from '$lib/layer-separator/masks';
 	import ZoomInIcon from 'virtual:icons/lucide/zoom-in';
 	import ZoomOutIcon from 'virtual:icons/lucide/zoom-out';
 
@@ -11,6 +12,8 @@
 		points: SamPoint[];
 		isPredicting: boolean;
 		onPick: (x: number, y: number, label: 0 | 1) => void;
+		featherRadius?: number;
+		maxFeather?: number;
 		overlayColor?: string;
 	}
 
@@ -22,6 +25,8 @@
 		points,
 		isPredicting,
 		onPick,
+		featherRadius = $bindable(0),
+		maxFeather = 32,
 		overlayColor = '255, 105, 180'
 	}: Props = $props();
 
@@ -57,22 +62,32 @@
 		zoom = 1;
 	}
 
+	// Preview reflects the feather radius so the user sees the softened edge before
+	// accepting. `featherMask` is cheap relative to SAM inference.
+	const previewMask = $derived.by(() => {
+		if (!pendingMask) return null;
+		return featherRadius > 0
+			? featherMask(pendingMask, maskWidth, maskHeight, featherRadius)
+			: pendingMask;
+	});
+
 	$effect(() => {
-		if (!overlayCanvasEl || !pendingMask) return;
+		const mask = previewMask;
+		if (!overlayCanvasEl || !mask) return;
 		overlayCanvasEl.width = maskWidth;
 		overlayCanvasEl.height = maskHeight;
 		const ctx = overlayCanvasEl.getContext('2d');
 		if (!ctx) return;
 		const imageData = ctx.createImageData(maskWidth, maskHeight);
 		const [r, g, b] = overlayColor.split(',').map((s) => parseInt(s.trim(), 10));
-		for (let i = 0; i < pendingMask.length; i++) {
+		for (let i = 0; i < mask.length; i++) {
+			if (mask[i] === 0) continue;
 			const j = i * 4;
-			if (pendingMask[i] > 0) {
-				imageData.data[j] = r;
-				imageData.data[j + 1] = g;
-				imageData.data[j + 2] = b;
-				imageData.data[j + 3] = 140;
-			}
+			imageData.data[j] = r;
+			imageData.data[j + 1] = g;
+			imageData.data[j + 2] = b;
+			// Scale opacity by the (possibly feathered) mask value so soft edges read as soft.
+			imageData.data[j + 3] = Math.round((mask[i] / 255) * 140);
 		}
 		ctx.putImageData(imageData, 0, 0);
 	});
@@ -97,6 +112,18 @@
 		>
 			<ZoomInIcon />
 		</button>
+		<label class="feather-control">
+			Feather
+			<input
+				type="range"
+				min="0"
+				max={maxFeather}
+				step="1"
+				bind:value={featherRadius}
+				disabled={isPredicting}
+			/>
+			<span class="feather-value">{featherRadius}px</span>
+		</label>
 	</div>
 	<div class="scroll-container">
 		<div class="image-wrap" style:width="{zoom * 100}%">
@@ -146,6 +173,33 @@
 		display: flex;
 		gap: 0.25rem;
 		align-items: center;
+		flex-wrap: wrap;
+	}
+	.feather-control {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		margin-left: 0.5rem;
+		font-weight: 700;
+		font-size: 0.8rem;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+	.feather-control input[type='range'] {
+		width: 6rem;
+		cursor: pointer;
+	}
+	.feather-control input:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+	.feather-value {
+		min-width: 2.6rem;
+		font-family: monospace;
+		font-weight: 400;
+		text-transform: none;
+		letter-spacing: 0;
+		color: #555;
 	}
 	.zoom-btn {
 		padding: 0.3rem 0.6rem;

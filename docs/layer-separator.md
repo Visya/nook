@@ -101,3 +101,6 @@ src/routes/[[lang]]/layer-separator/
 - Optional `depth-anything-v2-base` for users on stronger machines.
 - Home-page card so the feature is discoverable from the app shell.
 - Free-form brush as a third `LayerOverride` source.
+- **Isolated-masks mode** (N standalone per-band masks instead of N − 1 cumulative ones), an additive
+  layer-cutout export, and a feather option for object selection — designed in
+  [`layer-separator-isolated-masks.md`](./layer-separator-isolated-masks.md).

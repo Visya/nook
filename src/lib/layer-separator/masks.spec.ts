@@ -3,6 +3,9 @@ import {
 	evenLayers,
 	assignPixelsToLayers,
 	buildCumulativeMasks,
+	buildLayerMasks,
+	featherMask,
+	depthToLayerMasks,
 	depthToMasks,
 	evenThresholds,
 	layersFromThresholds,
@@ -110,6 +113,110 @@ describe('depthToMasks (integration)', () => {
 		// pixel layers: [0, 1, 2]
 		expect(Array.from(masks[0])).toEqual([0, 255, 255]);
 		expect(Array.from(masks[1])).toEqual([0, 0, 255]);
+	});
+});
+
+describe('buildLayerMasks', () => {
+	it('returns N isolated masks for N layers', () => {
+		const pixelLayers = new Uint8Array([0, 1, 2]);
+		expect(buildLayerMasks(pixelLayers, 3)).toHaveLength(3);
+	});
+
+	it('mask k is white only for pixels in layer k', () => {
+		const pixelLayers = new Uint8Array([0, 1, 2, 2]);
+		const [m0, m1, m2] = buildLayerMasks(pixelLayers, 3);
+		expect(Array.from(m0)).toEqual([255, 0, 0, 0]);
+		expect(Array.from(m1)).toEqual([0, 255, 0, 0]);
+		expect(Array.from(m2)).toEqual([0, 0, 255, 255]);
+	});
+
+	it('masks are disjoint and complete (each pixel white in exactly one, OR == all-255)', () => {
+		const pixelLayers = new Uint8Array([0, 0, 1, 2, 2, 1]);
+		const masks = buildLayerMasks(pixelLayers, 3);
+		for (let i = 0; i < pixelLayers.length; i++) {
+			const white = masks.filter((m) => m[i] === 255).length;
+			expect(white).toBe(1);
+			expect(masks.reduce((acc, m) => acc | m[i], 0)).toBe(255);
+		}
+	});
+});
+
+describe('featherMask', () => {
+	it('radius 0 returns an unchanged copy', () => {
+		const mask = new Uint8Array([0, 255, 255, 0]);
+		const out = featherMask(mask, 2, 2, 0);
+		expect(Array.from(out)).toEqual([0, 255, 255, 0]);
+		expect(out).not.toBe(mask);
+	});
+
+	it('keeps a fully-white interior at 255', () => {
+		// 5x5 all white → every window is all-255 → stays 255.
+		const mask = new Uint8Array(25).fill(255);
+		const out = featherMask(mask, 5, 5, 1);
+		expect(Array.from(out)).toEqual(Array(25).fill(255));
+	});
+
+	it('keeps a border-touching white region opaque at the frame', () => {
+		const mask = new Uint8Array(25).fill(255);
+		const out = featherMask(mask, 5, 5, 2);
+		// Corner and edge pixels replicate the border, so they stay white.
+		expect(out[0]).toBe(255);
+		expect(out[4]).toBe(255);
+		expect(out[24]).toBe(255);
+	});
+
+	it('ramps monotonically across a vertical half-plane boundary', () => {
+		// Left 3 columns white, right 3 black, 6 wide × 1 tall.
+		const width = 6;
+		const mask = new Uint8Array([255, 255, 255, 0, 0, 0]);
+		const out = featherMask(mask, width, 1, 1);
+		for (let x = 1; x < width; x++) {
+			expect(out[x]).toBeLessThanOrEqual(out[x - 1]);
+		}
+		// Far interior on each side stays saturated.
+		expect(out[0]).toBe(255);
+		expect(out[width - 1]).toBe(0);
+	});
+});
+
+describe('depthToLayerMasks', () => {
+	it('with no feather equals buildLayerMasks(assignPixelsToLayers(...))', () => {
+		const layers = evenLayers(3);
+		const depth = new Uint8Array([0, 100, 200, 50]);
+		const masks = depthToLayerMasks(depth, layers);
+		const expected = buildLayerMasks(assignPixelsToLayers(depth, layers), 3);
+		expect(masks).toHaveLength(3);
+		masks.forEach((m, i) => expect(Array.from(m)).toEqual(Array.from(expected[i])));
+	});
+
+	it('a feathered override softens its band edge but keeps masks summing to ~255', () => {
+		const layers = layersFromThresholds([128]); // 2 layers
+		// 4x1 strip: depth puts all in layer 0; an override claims the left half for layer 1.
+		const depth = new Uint8Array([0, 0, 0, 0]);
+		layers[1].overrides.push({
+			source: 'sam-override',
+			mask: new Uint8Array([255, 255, 0, 0]),
+			featherRadius: 1
+		});
+		const [m0, m1] = depthToLayerMasks(depth, layers, 4, 1);
+		// Soft seam: at least one pixel is partial (not 0/255) in each mask.
+		expect(m1.some((v) => v > 0 && v < 255)).toBe(true);
+		for (let i = 0; i < 4; i++) {
+			expect(m0[i] + m1[i]).toBeGreaterThanOrEqual(254);
+			expect(m0[i] + m1[i]).toBeLessThanOrEqual(255);
+		}
+	});
+
+	it('does not change hard pixel ownership when an override is feathered', () => {
+		const layers = layersFromThresholds([128]);
+		const depth = new Uint8Array([0, 0, 0, 0]);
+		layers[1].overrides.push({
+			source: 'sam-override',
+			mask: new Uint8Array([255, 0, 0, 0]),
+			featherRadius: 2
+		});
+		// Ownership (used by cumulative mode) is unaffected by feather: pixel 0 → layer 1.
+		expect(Array.from(assignPixelsToLayers(depth, layers))).toEqual([1, 0, 0, 0]);
 	});
 });
 

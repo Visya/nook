@@ -83,6 +83,145 @@ export function depthToMasks(depth: Uint8Array, layers: Layer[]): Uint8Array[] {
 }
 
 /**
+ * Build isolated (non-cumulative) B&W masks from per-pixel layer assignments.
+ * Returns `layerCount` masks — one per layer, including the frontmost.
+ *
+ * Mask k: pixels assigned to layer k are WHITE (255), every other pixel BLACK (0).
+ * Unlike `buildCumulativeMasks`, mask k does not fold in the layers behind it, so
+ * each mask isolates a single band and is usable on its own.
+ */
+export function buildLayerMasks(pixelLayers: Uint8Array, layerCount: number): Uint8Array[] {
+	if (layerCount < 1) return [];
+	const masks: Uint8Array[] = [];
+	for (let k = 0; k < layerCount; k++) {
+		const m = new Uint8Array(pixelLayers.length);
+		for (let i = 0; i < pixelLayers.length; i++) {
+			m[i] = pixelLayers[i] === k ? 255 : 0;
+		}
+		masks.push(m);
+	}
+	return masks;
+}
+
+const clampIndex = (v: number, max: number): number => (v < 0 ? 0 : v > max ? max : v);
+
+/**
+ * Soften a binary mask's edge into an 8-bit alpha ramp.
+ *
+ * A separable box blur (two 1-D passes, window = 2·radius+1) over the 0/255 mask
+ * turns each hard edge into a roughly-linear ramp spanning the radius. Out-of-bounds
+ * samples replicate the border pixel, so a region touching the image edge stays fully
+ * white at the frame instead of fading against it. radius ≤ 0 returns a copy unchanged.
+ */
+export function featherMask(
+	mask: Uint8Array,
+	width: number,
+	height: number,
+	radius: number
+): Uint8Array {
+	const n = width * height;
+	if (mask.length !== n) {
+		throw new Error(`featherMask: mask length ${mask.length} does not match ${width}×${height}`);
+	}
+	const r = Math.round(radius);
+	if (r <= 0) return mask.slice();
+
+	const win = 2 * r + 1;
+	const tmp = new Float32Array(n);
+	// Horizontal pass.
+	for (let y = 0; y < height; y++) {
+		const row = y * width;
+		let sum = 0;
+		for (let k = -r; k <= r; k++) sum += mask[row + clampIndex(k, width - 1)];
+		tmp[row] = sum / win;
+		for (let x = 1; x < width; x++) {
+			sum +=
+				mask[row + clampIndex(x + r, width - 1)] - mask[row + clampIndex(x - r - 1, width - 1)];
+			tmp[row + x] = sum / win;
+		}
+	}
+	// Vertical pass.
+	const out = new Uint8Array(n);
+	for (let x = 0; x < width; x++) {
+		let sum = 0;
+		for (let k = -r; k <= r; k++) sum += tmp[clampIndex(k, height - 1) * width + x];
+		out[x] = Math.round(sum / win);
+		for (let y = 1; y < height; y++) {
+			sum +=
+				tmp[clampIndex(y + r, height - 1) * width + x] -
+				tmp[clampIndex(y - r - 1, height - 1) * width + x];
+			out[y * width + x] = Math.round(sum / win);
+		}
+	}
+	return out;
+}
+
+/**
+ * Depth map → isolated per-layer masks.
+ *
+ * When no override carries a feather radius (or dimensions are unknown) this is just
+ * `buildLayerMasks(assignPixelsToLayers(...))` — hard, disjoint, summing to all-white.
+ *
+ * When an override has `featherRadius > 0`, that object's contribution is composited
+ * as soft alpha (`featherMask`) over the depth-only assignment in foreground order, so
+ * its edge falls off gradually and the band behind it shows through the soft seam.
+ * Pixel ownership itself stays hard — feather is purely an output-alpha effect.
+ */
+export function depthToLayerMasks(
+	depth: Uint8Array,
+	layers: Layer[],
+	width = 0,
+	height = 0
+): Uint8Array[] {
+	const n = depth.length;
+	const hasFeather = layers.some((l) => l.overrides.some((o) => (o.featherRadius ?? 0) > 0));
+	if (!hasFeather || width * height !== n) {
+		return buildLayerMasks(assignPixelsToLayers(depth, layers), layers.length);
+	}
+
+	// Base layer assignment from depth alone (overrides are painted on below).
+	const masks = layers.map(() => new Uint8Array(n));
+	for (let i = 0; i < n; i++) {
+		const d = depth[i];
+		let owner = layers.length - 1;
+		for (let l = 0; l < layers.length; l++) {
+			if (d >= layers[l].depthMin && d < layers[l].depthMax) {
+				owner = l;
+				break;
+			}
+		}
+		masks[owner][i] = 255;
+	}
+
+	// Paint overrides as soft alpha-over, foreground (higher index) last so it wins ties.
+	for (let l = 0; l < layers.length; l++) {
+		for (const ov of layers[l].overrides) {
+			if (ov.mask.length !== n) {
+				throw new Error(`Override mask length ${ov.mask.length} does not match depth length ${n}`);
+			}
+			const a =
+				(ov.featherRadius ?? 0) > 0
+					? featherMask(ov.mask, width, height, ov.featherRadius!)
+					: ov.mask;
+			for (let i = 0; i < n; i++) {
+				const av = a[i];
+				if (av === 0) continue;
+				if (av >= 255) {
+					for (let k = 0; k < masks.length; k++) masks[k][i] = k === l ? 255 : 0;
+					continue;
+				}
+				const inv = 255 - av;
+				for (let k = 0; k < masks.length; k++) {
+					if (k !== l) masks[k][i] = Math.round((masks[k][i] * inv) / 255);
+				}
+				masks[l][i] = Math.min(255, Math.round((masks[l][i] * inv) / 255) + av);
+			}
+		}
+	}
+	return masks;
+}
+
+/**
  * Build the initial threshold cuts for `layerCount` evenly-spaced layers.
  * Returns `layerCount - 1` cuts in 1..255.
  */

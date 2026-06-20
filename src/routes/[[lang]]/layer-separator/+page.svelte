@@ -21,6 +21,7 @@
 	import SamPicker from '$lib/components/layer-separator/SamPicker.svelte';
 	import {
 		depthToMasks,
+		depthToLayerMasks,
 		depthHistogram,
 		evenThresholds,
 		layersFromThresholds,
@@ -40,7 +41,7 @@
 		type SamPoint
 	} from '$lib/layer-separator/sam';
 	import type { LayerOverride } from '$lib/layer-separator/types';
-	import type { MasksResponse } from '$lib/layer-separator/masks.worker';
+	import type { MaskMode, MasksResponse } from '$lib/layer-separator/masks.worker';
 
 	type DepthOutput = { depth: RawImage };
 	type DepthPipeline = (input: string) => Promise<DepthOutput>;
@@ -62,6 +63,7 @@
 	];
 	const MIN_LAYERS = 2;
 	const MAX_LAYERS = 5;
+	const MAX_FEATHER = 32;
 
 	let selectedDepthModelId = $state(DEPTH_MODELS[0].id);
 	const selectedDepthModelName = $derived(
@@ -92,6 +94,12 @@
 	const COMMIT_DELAY_MS = 150;
 	// Per-layer overrides, parallel to layers (overridesByLayer[i] applies to layer i).
 	let overridesByLayer = $state<LayerOverride[][]>([[], [], []]);
+
+	// Output mode: 'cumulative' = N-1 stacked cut masks (Photoshop layer masks);
+	// 'isolated' = N standalone per-band masks (each selects one band on its own).
+	let maskMode = $state<MaskMode>('cumulative');
+	// Default feather radius (px) stamped onto a new object override at accept time.
+	let featherRadius = $state(0);
 
 	// SAM state
 	let samCore = $state<SamCore | null>(null);
@@ -162,7 +170,12 @@
 					// Fall back to main-thread compute for the rest of the session.
 					workerFailed = true;
 					masksWorker = null;
-					if (depthData) masks = depthToMasks(depthData, layers);
+					if (depthData) {
+						masks =
+							maskMode === 'isolated'
+								? depthToLayerMasks(depthData, layers, depthW, depthH)
+								: depthToMasks(depthData, layers);
+					}
 					isComputingMasks = false;
 				};
 			} catch {
@@ -176,6 +189,9 @@
 	$effect(() => {
 		const depth = depthData;
 		const currentLayers = layers;
+		const mode = maskMode;
+		const width = depthW;
+		const height = depthH;
 		if (!depth) {
 			masks = [];
 			isComputingMasks = false;
@@ -187,12 +203,21 @@
 		const payloadLayers = currentLayers.map((l) => ({
 			depthMin: l.depthMin,
 			depthMax: l.depthMax,
-			overrides: l.overrides.map((o) => ({ source: o.source, mask: o.mask }))
+			overrides: l.overrides.map((o) => ({
+				source: o.source,
+				mask: o.mask,
+				featherRadius: o.featherRadius
+			}))
 		}));
+
+		const compute = () =>
+			mode === 'isolated'
+				? depthToLayerMasks(depth, payloadLayers, width, height)
+				: depthToMasks(depth, payloadLayers);
 
 		const worker = ensureMasksWorker();
 		if (worker) {
-			worker.postMessage({ id, depth, layers: payloadLayers });
+			worker.postMessage({ id, depth, layers: payloadLayers, mode, width, height });
 			return;
 		}
 
@@ -201,7 +226,7 @@
 		const outer = requestAnimationFrame(() => {
 			inner = requestAnimationFrame(() => {
 				if (id !== masksRequestId) return;
-				masks = depthToMasks(depth, payloadLayers);
+				masks = compute();
 				isComputingMasks = false;
 			});
 		});
@@ -388,9 +413,12 @@
 	function acceptOverride() {
 		if (editingLayerIndex === null || !pendingMask) return;
 		const idx = editingLayerIndex;
-		const next = overridesByLayer.map((arr, i) =>
-			i === idx ? [...arr, { source: 'sam-override', mask: pendingMask! } as LayerOverride] : arr
-		);
+		const override: LayerOverride = {
+			source: 'sam-override',
+			mask: pendingMask!,
+			featherRadius
+		};
+		const next = overridesByLayer.map((arr, i) => (i === idx ? [...arr, override] : arr));
 		overridesByLayer = next;
 		cancelEdit();
 	}
@@ -452,10 +480,13 @@
 		thresholds = next;
 	}
 
+	// Download filename noun: 'cumulative' → mask_k (stacked cut), 'isolated' → layer_k (one band).
+	const maskNoun = $derived(maskMode === 'isolated' ? 'layer' : 'mask');
+
 	async function downloadMask(index: number) {
 		if (!depthData) return;
 		const url = await grayscaleToBlobUrl(masks[index], depthW, depthH);
-		downloadBlobUrl(url, `${sourceFileName}_mask_${index + 1}.png`);
+		downloadBlobUrl(url, `${sourceFileName}_${maskNoun}_${index + 1}.png`);
 		// Revoke after the click handler so the download has time to start.
 		setTimeout(() => URL.revokeObjectURL(url), 5000);
 	}
@@ -472,7 +503,7 @@
 		const zip = new JSZip();
 		for (let i = 0; i < masks.length; i++) {
 			const blob = await grayscaleToBlob(masks[i], depthW, depthH);
-			zip.file(`${sourceFileName}_mask_${i + 1}.png`, blob);
+			zip.file(`${sourceFileName}_${maskNoun}_${i + 1}.png`, blob);
 		}
 		// Also include the depth map for reference.
 		const depthBlob = await grayscaleToBlob(depthData, depthW, depthH);
@@ -574,8 +605,8 @@
 							<input type="file" accept="image/*" onchange={handleFile} disabled={isProcessing} />
 						</label>
 						<p class="hint">
-							Output is N-1 cumulative B&W masks at source resolution, ready to drop into Photoshop
-							as layer masks.
+							Output is B&W masks at source resolution: N−1 cumulative masks for Photoshop, or N
+							standalone per-band masks — your choice after upload.
 						</p>
 					</div>
 				</SectionCard>
@@ -700,6 +731,8 @@
 									points={pickedPoints}
 									{isPredicting}
 									onPick={handleSamClick}
+									bind:featherRadius
+									maxFeather={MAX_FEATHER}
 								/>
 								<div class="sam-actions">
 									{#if pendingMask}
@@ -733,7 +766,34 @@
 				</SectionCard>
 
 				<SectionCard rotation={0.1} animationDelay={0.2}>
-					<StepHeader stepNumber={6} title="Cumulative Masks" />
+					<StepHeader
+						stepNumber={6}
+						title={maskMode === 'isolated' ? 'Isolated Masks' : 'Cumulative Masks'}
+					/>
+
+					<div class="mode-toggle" role="radiogroup" aria-label="Mask output mode">
+						<button
+							class="mode-btn"
+							class:active={maskMode === 'cumulative'}
+							role="radio"
+							aria-checked={maskMode === 'cumulative'}
+							onclick={() => (maskMode = 'cumulative')}
+						>
+							<span class="mode-name">Cumulative</span>
+							<span class="mode-desc">N−1 stacked cut masks for Photoshop</span>
+						</button>
+						<button
+							class="mode-btn"
+							class:active={maskMode === 'isolated'}
+							role="radio"
+							aria-checked={maskMode === 'isolated'}
+							onclick={() => (maskMode = 'isolated')}
+						>
+							<span class="mode-name">Isolated</span>
+							<span class="mode-desc">N standalone per-band masks</span>
+						</button>
+					</div>
+
 					{#if masksUpdating}
 						<p class="masks-updating" role="status" aria-live="polite">
 							<span class="mini-spinner" aria-hidden="true"></span>
@@ -741,8 +801,13 @@
 						</p>
 					{/if}
 					<p class="hint">
-						{masks.length} mask{masks.length === 1 ? '' : 's'} for {layers.length} layers. Mask k is BLACK
-						where layers 1..k live; the frontmost layer has no mask.
+						{#if maskMode === 'isolated'}
+							{masks.length} mask{masks.length === 1 ? '' : 's'} for {layers.length} layers. Each mask
+							is WHITE for one band only — drop it straight onto a selection, no stacking needed.
+						{:else}
+							{masks.length} mask{masks.length === 1 ? '' : 's'} for {layers.length} layers. Mask k is
+							BLACK where layers 1..k live; the frontmost layer has no mask.
+						{/if}
 					</p>
 					<div class="masks-actions">
 						<ActionButton
@@ -757,10 +822,20 @@
 					<div class="masks-grid" class:updating={masksUpdating} aria-busy={masksUpdating}>
 						{#each masks as mask, i (i)}
 							<figure>
-								<figcaption>Mask {i + 1} — covers layers 1–{i + 1}</figcaption>
+								<figcaption>
+									{#if maskMode === 'isolated'}
+										Layer {i + 1} — this band only
+									{:else}
+										Mask {i + 1} — covers layers 1–{i + 1}
+									{/if}
+								</figcaption>
 								<MaskCanvas {mask} width={depthW} height={depthH} alt="Mask {i + 1}" />
 								<ActionButton onClick={() => downloadMask(i)} Icon={DownloadIcon}>
-									Download mask {i + 1}
+									{#if maskMode === 'isolated'}
+										Download layer {i + 1}
+									{:else}
+										Download mask {i + 1}
+									{/if}
 								</ActionButton>
 							</figure>
 						{/each}
@@ -858,6 +933,43 @@
 		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 		gap: 1.5rem;
 		margin-top: 1rem;
+	}
+	.mode-toggle {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin: 1rem 0;
+	}
+	.mode-btn {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		padding: 0.6rem 1rem;
+		background: #f0f0f0;
+		border: 2px solid #000;
+		cursor: pointer;
+		font-family: inherit;
+		box-shadow: 3px 3px 0 #000;
+		text-align: left;
+		flex: 1;
+		min-width: 200px;
+	}
+	.mode-btn:hover {
+		transform: translate(-1px, -1px);
+		box-shadow: 4px 4px 0 #000;
+	}
+	.mode-btn.active {
+		background: #ffd93d;
+	}
+	.mode-name {
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		font-size: 0.9rem;
+	}
+	.mode-desc {
+		font-size: 0.75rem;
+		color: #555;
 	}
 	.layer-overrides {
 		display: flex;

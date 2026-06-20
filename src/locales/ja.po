@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-24T22:41:34.932Z\n"
-"PO-Revision-Date: 2026-05-31T09:28:20.437Z\n"
+"PO-Revision-Date: 2026-06-20T22:55:14.115Z\n"
 "Last-Translator: \n"
 "Language: ja\n"
 "Language-Team: \n"
@@ -1711,10 +1711,14 @@ msgstr ""
 msgid "Cumulative Masks"
 msgstr "累積マスク"
 
-#~ msgid ""
-#~ "{0} mask{1} for {2} layers. Mask k is\n"
-#~ "BLACK where layers 1..k live; the frontmost layer has no mask."
-#~ msgstr ""
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#. placeholder {2}: layers.length
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"{0} mask{1} for {2} layers. Mask k is\n"
+"BLACK where layers 1..k live; the frontmost layer has no mask."
+msgstr ""
 
 #. placeholder {0}: i + 1
 #. placeholder {1}: i + 1
@@ -1735,24 +1739,19 @@ msgstr "ドラッグ可能なレイヤーしきい値付き深度ヒストグラ
 msgid "Threshold {0}"
 msgstr "しきい値 {0}"
 
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid ""
-"Output is N-1 cumulative B&W masks at source resolution, ready to drop into Photoshop\n"
-"as layer masks."
-msgstr ""
-"出力は元画像解像度の N-1 個の累積白黒マスクで、Photoshop のレイヤーマスクとして\n"
-"そのまま使用できます。"
+#~ msgid ""
+#~ "Output is N-1 cumulative B&W masks at source resolution, ready to drop into Photoshop\n"
+#~ "as layer masks."
+#~ msgstr ""
+#~ "出力は元画像解像度の N-1 個の累積白黒マスクで、Photoshop のレイヤーマスクとして\n"
+#~ "そのまま使用できます。"
 
-#. placeholder {0}: masks.length
-#. placeholder {1}: masks.length === 1 ? '' : 's'
-#. placeholder {2}: layers.length
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid ""
-"{0} mask{1} for {2} layers. Mask k is BLACK\n"
-"where layers 1..k live; the frontmost layer has no mask."
-msgstr ""
-"{2} 個のレイヤーに対して {0} 個のマスク{1}。マスク k はレイヤー 1..k がある場所が黒、\n"
-"最前面のレイヤーにはマスクがありません。"
+#~ msgid ""
+#~ "{0} mask{1} for {2} layers. Mask k is BLACK\n"
+#~ "where layers 1..k live; the frontmost layer has no mask."
+#~ msgstr ""
+#~ "{2} 個のレイヤーに対して {0} 個のマスク{1}。マスク k はレイヤー 1..k がある場所が黒、\n"
+#~ "最前面のレイヤーにはマスクがありません。"
 
 #~ msgid "Click to pick an object"
 #~ msgstr ""
@@ -1951,3 +1950,56 @@ msgstr "オブジェクトをセグメント化"
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "<0/> Segmenting…"
 msgstr "<0/> セグメント化中…"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Feather <0/> <1>{0}px</1>"
+msgstr "ぼかし <0/> <1>{0}px</1>"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"Output is B&W masks at source resolution: N−1 cumulative masks for Photoshop, or N\n"
+"standalone per-band masks — your choice after upload."
+msgstr "出力は元解像度の白黒マスクです。Photoshop用のN−1枚の累積マスク、または各バンドごとに独立したN枚のマスク。アップロード後に選択できます。"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Isolated Masks"
+msgstr "分離マスク"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Mask output mode"
+msgstr "マスク出力モード"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Cumulative"
+msgstr "累積"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "N−1 stacked cut masks for Photoshop"
+msgstr "Photoshop用のN−1枚の重ねるカットマスク"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Isolated"
+msgstr "分離"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "N standalone per-band masks"
+msgstr "バンドごとに独立したN枚のマスク"
+
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#. placeholder {2}: layers.length
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"{0} mask{1} for {2} layers. Each mask\n"
+"is WHITE for one band only — drop it straight onto a selection, no stacking needed."
+msgstr "{2}レイヤーに対して{0}枚のマスク{1}。各マスクは1つのバンドのみ白で表示され、重ねることなくそのまま選択範囲に使えます。"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer {0} — this band only"
+msgstr "レイヤー{0} — このバンドのみ"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Download layer {0}"
+msgstr "レイヤー{0}をダウンロード"

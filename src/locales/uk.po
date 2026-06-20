@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T21:20:18.035Z\n"
-"PO-Revision-Date: 2026-05-31T09:28:20.440Z\n"
+"PO-Revision-Date: 2026-06-20T22:55:14.118Z\n"
 "Last-Translator: \n"
 "Language: uk\n"
 "Language-Team: \n"
@@ -1711,10 +1711,14 @@ msgstr ""
 msgid "Cumulative Masks"
 msgstr "Кумулятивні маски"
 
-#~ msgid ""
-#~ "{0} mask{1} for {2} layers. Mask k is\n"
-#~ "BLACK where layers 1..k live; the frontmost layer has no mask."
-#~ msgstr ""
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#. placeholder {2}: layers.length
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"{0} mask{1} for {2} layers. Mask k is\n"
+"BLACK where layers 1..k live; the frontmost layer has no mask."
+msgstr ""
 
 #. placeholder {0}: i + 1
 #. placeholder {1}: i + 1
@@ -1735,24 +1739,19 @@ msgstr "Гістограма глибини з перетягуваними по
 msgid "Threshold {0}"
 msgstr "Поріг {0}"
 
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid ""
-"Output is N-1 cumulative B&W masks at source resolution, ready to drop into Photoshop\n"
-"as layer masks."
-msgstr ""
-"Результат — N-1 кумулятивних чорно-білих масок в оригінальній роздільній здатності,\n"
-"готових для використання як маски шарів у Photoshop."
+#~ msgid ""
+#~ "Output is N-1 cumulative B&W masks at source resolution, ready to drop into Photoshop\n"
+#~ "as layer masks."
+#~ msgstr ""
+#~ "Результат — N-1 кумулятивних чорно-білих масок в оригінальній роздільній здатності,\n"
+#~ "готових для використання як маски шарів у Photoshop."
 
-#. placeholder {0}: masks.length
-#. placeholder {1}: masks.length === 1 ? '' : 's'
-#. placeholder {2}: layers.length
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid ""
-"{0} mask{1} for {2} layers. Mask k is BLACK\n"
-"where layers 1..k live; the frontmost layer has no mask."
-msgstr ""
-"{0} мас{1} для {2} шарів. Маска k — ЧОРНА\n"
-"там, де шари 1..k; передній шар не має маски."
+#~ msgid ""
+#~ "{0} mask{1} for {2} layers. Mask k is BLACK\n"
+#~ "where layers 1..k live; the frontmost layer has no mask."
+#~ msgstr ""
+#~ "{0} мас{1} для {2} шарів. Маска k — ЧОРНА\n"
+#~ "там, де шари 1..k; передній шар не має маски."
 
 #~ msgid "Click to pick an object"
 #~ msgstr ""
@@ -1951,3 +1950,56 @@ msgstr "Сегментування об'єкта"
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "<0/> Segmenting…"
 msgstr "<0/> Сегментування…"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Feather <0/> <1>{0}px</1>"
+msgstr "Розтушовка <0/> <1>{0}px</1>"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"Output is B&W masks at source resolution: N−1 cumulative masks for Photoshop, or N\n"
+"standalone per-band masks — your choice after upload."
+msgstr "Результат — чорно-білі маски в оригінальній роздільності: N−1 кумулятивних масок для Photoshop або N окремих масок для кожного шару — ви обираєте після завантаження."
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Isolated Masks"
+msgstr "Окремі маски"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Mask output mode"
+msgstr "Режим виведення масок"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Cumulative"
+msgstr "Кумулятивні"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "N−1 stacked cut masks for Photoshop"
+msgstr "N−1 накладених масок-вирізів для Photoshop"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Isolated"
+msgstr "Окремі"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "N standalone per-band masks"
+msgstr "N окремих масок для кожного шару"
+
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#. placeholder {2}: layers.length
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"{0} mask{1} for {2} layers. Each mask\n"
+"is WHITE for one band only — drop it straight onto a selection, no stacking needed."
+msgstr "{0} мас{1} для {2} шарів. Кожна маска БІЛА лише для однієї смуги — застосуйте її одразу до виділення, без накладання."
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer {0} — this band only"
+msgstr "Шар {0} — лише ця смуга"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Download layer {0}"
+msgstr "Завантажити шар {0}"

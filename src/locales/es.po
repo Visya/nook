@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-24T22:12:14.886Z\n"
-"PO-Revision-Date: 2026-05-31T09:28:20.435Z\n"
+"PO-Revision-Date: 2026-06-20T22:55:14.113Z\n"
 "Last-Translator: \n"
 "Language: es\n"
 "Language-Team: \n"
@@ -1711,10 +1711,14 @@ msgstr ""
 msgid "Cumulative Masks"
 msgstr "Máscaras acumulativas"
 
-#~ msgid ""
-#~ "{0} mask{1} for {2} layers. Mask k is\n"
-#~ "BLACK where layers 1..k live; the frontmost layer has no mask."
-#~ msgstr ""
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#. placeholder {2}: layers.length
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"{0} mask{1} for {2} layers. Mask k is\n"
+"BLACK where layers 1..k live; the frontmost layer has no mask."
+msgstr ""
 
 #. placeholder {0}: i + 1
 #. placeholder {1}: i + 1
@@ -1735,24 +1739,19 @@ msgstr "Histograma de profundidad con umbrales de capa arrastrables"
 msgid "Threshold {0}"
 msgstr "Umbral {0}"
 
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid ""
-"Output is N-1 cumulative B&W masks at source resolution, ready to drop into Photoshop\n"
-"as layer masks."
-msgstr ""
-"La salida son N-1 máscaras acumulativas en blanco y negro a la resolución original,\n"
-"listas para usar como máscaras de capa en Photoshop."
+#~ msgid ""
+#~ "Output is N-1 cumulative B&W masks at source resolution, ready to drop into Photoshop\n"
+#~ "as layer masks."
+#~ msgstr ""
+#~ "La salida son N-1 máscaras acumulativas en blanco y negro a la resolución original,\n"
+#~ "listas para usar como máscaras de capa en Photoshop."
 
-#. placeholder {0}: masks.length
-#. placeholder {1}: masks.length === 1 ? '' : 's'
-#. placeholder {2}: layers.length
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid ""
-"{0} mask{1} for {2} layers. Mask k is BLACK\n"
-"where layers 1..k live; the frontmost layer has no mask."
-msgstr ""
-"{0} máscara{1} para {2} capas. La máscara k es NEGRA\n"
-"donde están las capas 1..k; la capa más cercana no tiene máscara."
+#~ msgid ""
+#~ "{0} mask{1} for {2} layers. Mask k is BLACK\n"
+#~ "where layers 1..k live; the frontmost layer has no mask."
+#~ msgstr ""
+#~ "{0} máscara{1} para {2} capas. La máscara k es NEGRA\n"
+#~ "donde están las capas 1..k; la capa más cercana no tiene máscara."
 
 #~ msgid "Click to pick an object"
 #~ msgstr ""
@@ -1951,3 +1950,56 @@ msgstr "Segmentando objeto"
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "<0/> Segmenting…"
 msgstr "<0/> Segmentando…"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Feather <0/> <1>{0}px</1>"
+msgstr "Calar <0/> <1>{0}px</1>"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"Output is B&W masks at source resolution: N−1 cumulative masks for Photoshop, or N\n"
+"standalone per-band masks — your choice after upload."
+msgstr "El resultado son máscaras en B/N a la resolución original: N−1 máscaras acumulativas para Photoshop o N máscaras independientes por banda; tú eliges tras subir la imagen."
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Isolated Masks"
+msgstr "Máscaras independientes"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Mask output mode"
+msgstr "Modo de salida de máscaras"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Cumulative"
+msgstr "Acumulativas"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "N−1 stacked cut masks for Photoshop"
+msgstr "N−1 máscaras de corte apiladas para Photoshop"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Isolated"
+msgstr "Independientes"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "N standalone per-band masks"
+msgstr "N máscaras independientes por banda"
+
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#. placeholder {2}: layers.length
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"{0} mask{1} for {2} layers. Each mask\n"
+"is WHITE for one band only — drop it straight onto a selection, no stacking needed."
+msgstr "{0} máscara{1} para {2} capas. Cada máscara es BLANCA solo para una banda; aplícala directamente a una selección, sin apilar."
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer {0} — this band only"
+msgstr "Capa {0} — solo esta banda"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Download layer {0}"
+msgstr "Descargar capa {0}"
