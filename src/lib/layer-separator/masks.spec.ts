@@ -4,6 +4,7 @@ import {
 	assignPixelsToLayers,
 	buildCumulativeMasks,
 	buildLayerMasks,
+	buildLayerCutout,
 	featherMask,
 	depthToLayerMasks,
 	depthToMasks,
@@ -176,6 +177,49 @@ describe('featherMask', () => {
 		// Far interior on each side stays saturated.
 		expect(out[0]).toBe(255);
 		expect(out[width - 1]).toBe(0);
+	});
+});
+
+describe('buildLayerCutout', () => {
+	it('copies colour straight through and uses the mask as alpha', () => {
+		// 2x1 image: red, green. Mask keeps pixel 0 fully, drops pixel 1.
+		const rgba = new Uint8ClampedArray([255, 0, 0, 255, 0, 255, 0, 255]);
+		const mask = new Uint8Array([255, 0]);
+		const out = buildLayerCutout(rgba, mask, 2, 1);
+		expect(out.length).toBe(8);
+		expect(Array.from(out.slice(0, 4))).toEqual([255, 0, 0, 255]);
+		// Colour preserved even where alpha is 0.
+		expect(Array.from(out.slice(4))).toEqual([0, 255, 0, 0]);
+	});
+
+	it('carries a feathered (partial) mask value into alpha', () => {
+		const rgba = new Uint8ClampedArray([10, 20, 30, 255]);
+		const out = buildLayerCutout(rgba, new Uint8Array([128]), 1, 1);
+		expect(out[3]).toBe(128);
+	});
+
+	it('stacking the N cutouts back-to-front reconstructs the source', () => {
+		const rgba = new Uint8ClampedArray([10, 20, 30, 255, 40, 50, 60, 255, 70, 80, 90, 255]);
+		const layers = layersFromThresholds([85, 170]); // 3 layers
+		const depth = new Uint8Array([0, 100, 200]); // → layers [0, 1, 2]
+		const masks = buildLayerMasks(assignPixelsToLayers(depth, layers), 3);
+		const cutouts = masks.map((m) => buildLayerCutout(rgba, m, 3, 1));
+		// Composite back-to-front: opaque alpha means the topmost covering layer wins.
+		const composed = new Uint8ClampedArray(12);
+		for (const c of cutouts) {
+			for (let i = 0; i < 3; i++) {
+				const j = i * 4;
+				if (c[j + 3] === 255) composed.set([c[j], c[j + 1], c[j + 2], 255], j);
+			}
+		}
+		expect(Array.from(composed)).toEqual(Array.from(rgba));
+	});
+
+	it('throws on mismatched lengths', () => {
+		expect(() => buildLayerCutout(new Uint8ClampedArray(8), new Uint8Array([255]), 2, 1)).toThrow();
+		expect(() =>
+			buildLayerCutout(new Uint8ClampedArray(4), new Uint8Array([255, 0]), 2, 1)
+		).toThrow();
 	});
 });
 

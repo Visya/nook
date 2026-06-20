@@ -42,6 +42,42 @@ export async function grayscaleToBlobUrl(
 }
 
 /**
+ * Render an RGBA byte array (length `width * height * 4`) as a PNG Blob, preserving
+ * the alpha channel — used for transparent per-layer cutouts.
+ */
+export function rgbaToBlob(data: Uint8ClampedArray, width: number, height: number): Promise<Blob> {
+	const canvas = document.createElement('canvas');
+	canvas.width = width;
+	canvas.height = height;
+	const ctx = canvas.getContext('2d');
+	if (!ctx) throw new Error('Could not get 2D context');
+
+	const imageData = ctx.createImageData(width, height);
+	imageData.data.set(data);
+	ctx.putImageData(imageData, 0, 0);
+
+	return new Promise((resolve, reject) => {
+		canvas.toBlob((blob) => {
+			if (blob) resolve(blob);
+			else reject(new Error('toBlob returned null'));
+		}, 'image/png');
+	});
+}
+
+/**
+ * Convenience wrapper that creates a blob URL ready for an `<a download>` link.
+ * Caller is responsible for revoking via `URL.revokeObjectURL`.
+ */
+export async function rgbaToBlobUrl(
+	data: Uint8ClampedArray,
+	width: number,
+	height: number
+): Promise<string> {
+	const blob = await rgbaToBlob(data, width, height);
+	return URL.createObjectURL(blob);
+}
+
+/**
  * Trigger a browser download for a blob URL.
  */
 export function downloadBlobUrl(url: string, filename: string): void {

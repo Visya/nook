@@ -222,6 +222,42 @@ export function depthToLayerMasks(
 }
 
 /**
+ * Compose a layer's source pixels with its (isolated) mask into an RGBA cutout.
+ *
+ * `rgba` is the source image sampled at the mask resolution (length width·height·4).
+ * The result copies colour straight through and uses the mask value as alpha, so a
+ * feathered mask yields a soft-edged cutout. Stacking the N cutouts back-to-front
+ * reconstructs the source image.
+ */
+export function buildLayerCutout(
+	rgba: Uint8ClampedArray,
+	mask: Uint8Array,
+	width: number,
+	height: number
+): Uint8ClampedArray {
+	const n = width * height;
+	if (mask.length !== n) {
+		throw new Error(
+			`buildLayerCutout: mask length ${mask.length} does not match ${width}×${height}`
+		);
+	}
+	if (rgba.length !== n * 4) {
+		throw new Error(
+			`buildLayerCutout: rgba length ${rgba.length} does not match ${width}×${height}`
+		);
+	}
+	const out = new Uint8ClampedArray(n * 4);
+	for (let i = 0; i < n; i++) {
+		const j = i * 4;
+		out[j] = rgba[j];
+		out[j + 1] = rgba[j + 1];
+		out[j + 2] = rgba[j + 2];
+		out[j + 3] = mask[i];
+	}
+	return out;
+}
+
+/**
  * Build the initial threshold cuts for `layerCount` evenly-spaced layers.
  * Returns `layerCount - 1` cuts in 1..255.
  */

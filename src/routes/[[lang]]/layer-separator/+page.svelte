@@ -17,11 +17,13 @@
 	import JSZip from 'jszip';
 
 	import MaskCanvas from '$lib/components/layer-separator/MaskCanvas.svelte';
+	import LayerCanvas from '$lib/components/layer-separator/LayerCanvas.svelte';
 	import DepthHistogram from '$lib/components/layer-separator/DepthHistogram.svelte';
 	import SamPicker from '$lib/components/layer-separator/SamPicker.svelte';
 	import {
 		depthToMasks,
 		depthToLayerMasks,
+		buildLayerCutout,
 		depthHistogram,
 		evenThresholds,
 		layersFromThresholds,
@@ -30,6 +32,8 @@
 	import {
 		grayscaleToBlob,
 		grayscaleToBlobUrl,
+		rgbaToBlob,
+		rgbaToBlobUrl,
 		downloadBlobUrl
 	} from '$lib/layer-separator/canvas';
 	import {
@@ -98,8 +102,19 @@
 	// Output mode: 'cumulative' = N-1 stacked cut masks (Photoshop layer masks);
 	// 'isolated' = N standalone per-band masks (each selects one band on its own).
 	let maskMode = $state<MaskMode>('cumulative');
+	// Within isolated mode, export each band as a B&W matte or a transparent RGBA cutout.
+	// Cutouts are isolated-only — a cumulative mask spans several bands, so "cut it out"
+	// has no single-layer meaning there.
+	let isolatedExport = $state<'mask' | 'cutout'>('mask');
 	// Default feather radius (px) stamped onto a new object override at accept time.
 	let featherRadius = $state(0);
+
+	// Source image sampled to the mask resolution; the colour data for RGBA cutouts.
+	let sourceRgba = $state.raw<Uint8ClampedArray | null>(null);
+	// Cutout export is only offered (and possible) in isolated mode with source pixels ready.
+	const showCutouts = $derived(
+		maskMode === 'isolated' && isolatedExport === 'cutout' && sourceRgba !== null
+	);
 
 	// SAM state
 	let samCore = $state<SamCore | null>(null);
@@ -291,11 +306,36 @@
 		}
 	}
 
+	// Draw the source image onto a canvas at the mask resolution and read back its RGBA
+	// so per-layer cutouts have colour data aligned pixel-for-pixel with the masks.
+	async function computeSourceRgba(
+		url: string,
+		w: number,
+		h: number
+	): Promise<Uint8ClampedArray | null> {
+		try {
+			const img = new Image();
+			img.src = url;
+			await img.decode();
+			const canvas = document.createElement('canvas');
+			canvas.width = w;
+			canvas.height = h;
+			const ctx = canvas.getContext('2d');
+			if (!ctx) return null;
+			ctx.drawImage(img, 0, 0, w, h);
+			return ctx.getImageData(0, 0, w, h).data;
+		} catch (err) {
+			console.warn('Could not read source pixels for cutouts:', err);
+			return null;
+		}
+	}
+
 	async function processImage(imageUrl: string) {
 		if (!depthEstimator) return;
 		try {
 			isProcessing = true;
 			error = false;
+			sourceRgba = null;
 			await requestWakeLock();
 
 			const out = await depthEstimator(imageUrl);
@@ -306,6 +346,8 @@
 				depthRaw.data instanceof Uint8Array
 					? depthRaw.data
 					: new Uint8Array(depthRaw.data as ArrayLike<number>);
+
+			sourceRgba = await computeSourceRgba(imageUrl, depthW, depthH);
 
 			// Reset per-image state.
 			thresholds = evenThresholds(layerCount);
@@ -485,6 +527,13 @@
 
 	async function downloadMask(index: number) {
 		if (!depthData) return;
+		if (showCutouts && sourceRgba) {
+			const cutout = buildLayerCutout(sourceRgba, masks[index], depthW, depthH);
+			const cutoutUrl = await rgbaToBlobUrl(cutout, depthW, depthH);
+			downloadBlobUrl(cutoutUrl, `${sourceFileName}_layer_${index + 1}.png`);
+			setTimeout(() => URL.revokeObjectURL(cutoutUrl), 5000);
+			return;
+		}
 		const url = await grayscaleToBlobUrl(masks[index], depthW, depthH);
 		downloadBlobUrl(url, `${sourceFileName}_${maskNoun}_${index + 1}.png`);
 		// Revoke after the click handler so the download has time to start.
@@ -501,9 +550,15 @@
 	async function downloadAllAsZip() {
 		if (masks.length === 0 || !depthData) return;
 		const zip = new JSZip();
+		const cutoutMode = showCutouts && sourceRgba;
 		for (let i = 0; i < masks.length; i++) {
-			const blob = await grayscaleToBlob(masks[i], depthW, depthH);
-			zip.file(`${sourceFileName}_${maskNoun}_${i + 1}.png`, blob);
+			if (cutoutMode) {
+				const cutout = buildLayerCutout(sourceRgba!, masks[i], depthW, depthH);
+				zip.file(`${sourceFileName}_layer_${i + 1}.png`, await rgbaToBlob(cutout, depthW, depthH));
+			} else {
+				const blob = await grayscaleToBlob(masks[i], depthW, depthH);
+				zip.file(`${sourceFileName}_${maskNoun}_${i + 1}.png`, blob);
+			}
 		}
 		// Also include the depth map for reference.
 		const depthBlob = await grayscaleToBlob(depthData, depthW, depthH);
@@ -517,6 +572,7 @@
 
 	function reset() {
 		depthData = null;
+		sourceRgba = null;
 		depthW = 0;
 		depthH = 0;
 		if (originalImageUrl && originalImageUrl.startsWith('blob:')) {
@@ -794,6 +850,32 @@
 						</button>
 					</div>
 
+					{#if maskMode === 'isolated'}
+						<div class="export-toggle" role="radiogroup" aria-label="Isolated export format">
+							<span class="export-label">Export as:</span>
+							<button
+								class="export-btn"
+								class:active={isolatedExport === 'mask'}
+								role="radio"
+								aria-checked={isolatedExport === 'mask'}
+								onclick={() => (isolatedExport = 'mask')}
+							>
+								B&amp;W masks
+							</button>
+							<button
+								class="export-btn"
+								class:active={isolatedExport === 'cutout'}
+								role="radio"
+								aria-checked={isolatedExport === 'cutout'}
+								onclick={() => (isolatedExport = 'cutout')}
+								disabled={sourceRgba === null}
+								title={sourceRgba === null ? 'Source pixels unavailable for this image' : ''}
+							>
+								Cut-out layers (PNG)
+							</button>
+						</div>
+					{/if}
+
 					{#if masksUpdating}
 						<p class="masks-updating" role="status" aria-live="polite">
 							<span class="mini-spinner" aria-hidden="true"></span>
@@ -801,7 +883,10 @@
 						</p>
 					{/if}
 					<p class="hint">
-						{#if maskMode === 'isolated'}
+						{#if showCutouts}
+							{masks.length} transparent PNG layer{masks.length === 1 ? '' : 's'} for {layers.length}
+							layers. Each holds only its own band's pixels; stack them back-to-front to rebuild the image.
+						{:else if maskMode === 'isolated'}
 							{masks.length} mask{masks.length === 1 ? '' : 's'} for {layers.length} layers. Each mask
 							is WHITE for one band only — drop it straight onto a selection, no stacking needed.
 						{:else}
@@ -829,7 +914,17 @@
 										Mask {i + 1} — covers layers 1–{i + 1}
 									{/if}
 								</figcaption>
-								<MaskCanvas {mask} width={depthW} height={depthH} alt="Mask {i + 1}" />
+								{#if showCutouts && sourceRgba}
+									<LayerCanvas
+										rgba={sourceRgba}
+										{mask}
+										width={depthW}
+										height={depthH}
+										alt="Layer {i + 1} cutout"
+									/>
+								{:else}
+									<MaskCanvas {mask} width={depthW} height={depthH} alt="Mask {i + 1}" />
+								{/if}
 								<ActionButton onClick={() => downloadMask(i)} Icon={DownloadIcon}>
 									{#if maskMode === 'isolated'}
 										Download layer {i + 1}
@@ -966,6 +1061,38 @@
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
 		font-size: 0.9rem;
+	}
+	.export-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		margin: 0 0 1rem;
+	}
+	.export-label {
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		font-size: 0.8rem;
+	}
+	.export-btn {
+		padding: 0.35rem 0.7rem;
+		background: #f0f0f0;
+		border: 2px solid #000;
+		font-weight: 700;
+		cursor: pointer;
+		font-family: inherit;
+		font-size: 0.8rem;
+	}
+	.export-btn:hover:not(:disabled) {
+		background: #98fb98;
+	}
+	.export-btn.active {
+		background: #98fb98;
+	}
+	.export-btn:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
 	}
 	.mode-desc {
 		font-size: 0.75rem;

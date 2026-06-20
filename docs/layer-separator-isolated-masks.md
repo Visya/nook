@@ -11,9 +11,14 @@ What shipped vs. this design:
 - Feather on object selection: `LayerOverride.featherRadius`, a slider in `SamPicker` with a soft live
   preview, and soft alpha-over compositing in `depthToLayerMasks`.
 - Worker carries `mode` + `width`/`height`; isolated downloads are named `…_layer_k.png`.
-- **Deferred** (still additive follow-ups): RGBA layer-cutout export (`buildLayerCutout`, `rgbaToBlob`,
-  a checkerboard results canvas) and per-layer (depth-seam) feather. The mask API was kept
-  cutout-ready as designed.
+- **Layer-cutout export** (the additive feature): in isolated mode, an "Export as: B&W masks /
+  Cut-out layers (PNG)" sub-toggle. `buildLayerCutout` composites the source pixels with each
+  isolated mask as alpha; `rgbaToBlob`/`rgbaToBlobUrl` write transparent PNGs; `LayerCanvas.svelte`
+  previews them over a checkerboard. Source pixels are sampled to mask resolution once after depth
+  runs (`sourceRgba`). Cutouts are **isolated-only** — a cumulative mask spans several bands, so
+  "cut it out" has no single-layer meaning there.
+- **Deferred** (still additive follow-ups): per-layer (depth-seam) feather; matte de-fringe; a
+  layered-document (PSD/AE) exporter; a reconstruct-the-stack preview.
 
 ## Motivation
 

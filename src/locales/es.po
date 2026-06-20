@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-24T22:12:14.886Z\n"
-"PO-Revision-Date: 2026-06-20T22:55:14.113Z\n"
+"PO-Revision-Date: 2026-06-20T23:36:15.056Z\n"
 "Last-Translator: \n"
 "Language: es\n"
 "Language-Team: \n"
@@ -2003,3 +2003,39 @@ msgstr "Capa {0} — solo esta banda"
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Download layer {0}"
 msgstr "Descargar capa {0}"
+
+#: src/lib/components/layer-separator/LayerCanvas.svelte
+msgid "Layer cutout"
+msgstr "Recorte de capa"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Isolated export format"
+msgstr "Formato de exportación independiente"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Export as:"
+msgstr "Exportar como:"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "B&W masks"
+msgstr "Máscaras en B/N"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Source pixels unavailable for this image"
+msgstr "Píxeles de origen no disponibles para esta imagen"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Cut-out layers (PNG)"
+msgstr "Capas recortadas (PNG)"
+
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#. placeholder {2}: layers.length
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "{0} transparent PNG layer{1} for {2} layers. Each holds only its own band's pixels; stack them back-to-front to rebuild the image."
+msgstr "{0} capa{1} PNG transparente para {2} capas. Cada una contiene solo los píxeles de su banda; apílalas de atrás hacia adelante para reconstruir la imagen."
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer {0} cutout"
+msgstr "Recorte de la capa {0}"

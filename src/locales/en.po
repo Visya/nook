@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T12:44:06.349Z\n"
-"PO-Revision-Date: 2026-06-20T22:55:14.110Z\n"
+"PO-Revision-Date: 2026-06-20T23:36:15.053Z\n"
 "Last-Translator: \n"
 "Language: en\n"
 "Language-Team: \n"
@@ -2021,3 +2021,39 @@ msgstr "Layer {0} — this band only"
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Download layer {0}"
 msgstr "Download layer {0}"
+
+#: src/lib/components/layer-separator/LayerCanvas.svelte
+msgid "Layer cutout"
+msgstr "Layer cutout"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Isolated export format"
+msgstr "Isolated export format"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Export as:"
+msgstr "Export as:"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "B&W masks"
+msgstr "B&W masks"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Source pixels unavailable for this image"
+msgstr "Source pixels unavailable for this image"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Cut-out layers (PNG)"
+msgstr "Cut-out layers (PNG)"
+
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#. placeholder {2}: layers.length
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "{0} transparent PNG layer{1} for {2} layers. Each holds only its own band's pixels; stack them back-to-front to rebuild the image."
+msgstr "{0} transparent PNG layer{1} for {2} layers. Each holds only its own band's pixels; stack them back-to-front to rebuild the image."
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer {0} cutout"
+msgstr "Layer {0} cutout"
