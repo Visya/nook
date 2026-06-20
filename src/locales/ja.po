@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-24T22:41:34.932Z\n"
-"PO-Revision-Date: 2026-06-20T23:36:15.058Z\n"
+"PO-Revision-Date: 2026-06-20T23:45:33.552Z\n"
 "Last-Translator: \n"
 "Language: ja\n"
 "Language-Team: \n"
@@ -2008,9 +2008,8 @@ msgstr "レイヤー{0}をダウンロード"
 msgid "Layer cutout"
 msgstr "レイヤー切り抜き"
 
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid "Isolated export format"
-msgstr "分離エクスポート形式"
+#~ msgid "Isolated export format"
+#~ msgstr "分離エクスポート形式"
 
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Export as:"
@@ -2035,7 +2034,34 @@ msgstr "切り抜きレイヤー（PNG）"
 msgid "{0} transparent PNG layer{1} for {2} layers. Each holds only its own band's pixels; stack them back-to-front to rebuild the image."
 msgstr "{2}レイヤーに対して{0}枚の透過PNGレイヤー{1}。各レイヤーは自身のバンドのピクセルのみを含みます。奥から手前へ重ねると元の画像が再構築されます。"
 
+#~ msgid "Layer {0} cutout"
+#~ msgstr "レイヤー{0}の切り抜き"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Export format"
+msgstr "エクスポート形式"
+
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"{0} transparent PNG cut-out{1}. Cut-out k keeps\n"
+"layers 1..k (the background up to that depth) and drops everything in front — no hole\n"
+"behind the foreground."
+msgstr "{0}枚の透過PNG切り抜き{1}。切り抜きkはレイヤー1..k（その深度までの背景）を保持し、手前のものをすべて除去します。前景の背後に穴は残りません。"
+
+#. placeholder {0}: i + 1
+#. placeholder {1}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Cut-out {0} — layers 1–{1} (background kept)"
+msgstr "切り抜き{0} — レイヤー1–{1}（背景を保持）"
+
 #. placeholder {0}: i + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid "Layer {0} cutout"
-msgstr "レイヤー{0}の切り抜き"
+msgid "Cut-out {0}"
+msgstr "切り抜き{0}"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Download cut-out {0}"
+msgstr "切り抜き{0}をダウンロード"

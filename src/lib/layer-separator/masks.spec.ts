@@ -198,6 +198,15 @@ describe('buildLayerCutout', () => {
 		expect(out[3]).toBe(128);
 	});
 
+	it('invert flips the alpha — keeps the black side of a cumulative mask (background-preserving)', () => {
+		// Cumulative mask: pixel 0 black (=this band + behind), pixel 1 white (=in front).
+		const rgba = new Uint8ClampedArray([255, 0, 0, 255, 0, 255, 0, 255]);
+		const mask = new Uint8Array([0, 255]);
+		const out = buildLayerCutout(rgba, mask, 2, 1, true);
+		expect(out[3]).toBe(255); // background pixel kept
+		expect(out[7]).toBe(0); // foreground pixel dropped
+	});
+
 	it('stacking the N cutouts back-to-front reconstructs the source', () => {
 		const rgba = new Uint8ClampedArray([10, 20, 30, 255, 40, 50, 60, 255, 70, 80, 90, 255]);
 		const layers = layersFromThresholds([85, 170]); // 3 layers

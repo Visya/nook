@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T12:44:06.349Z\n"
-"PO-Revision-Date: 2026-06-20T23:36:15.053Z\n"
+"PO-Revision-Date: 2026-06-20T23:45:33.549Z\n"
 "Last-Translator: \n"
 "Language: en\n"
 "Language-Team: \n"
@@ -2026,9 +2026,8 @@ msgstr "Download layer {0}"
 msgid "Layer cutout"
 msgstr "Layer cutout"
 
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid "Isolated export format"
-msgstr "Isolated export format"
+#~ msgid "Isolated export format"
+#~ msgstr "Isolated export format"
 
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Export as:"
@@ -2053,7 +2052,37 @@ msgstr "Cut-out layers (PNG)"
 msgid "{0} transparent PNG layer{1} for {2} layers. Each holds only its own band's pixels; stack them back-to-front to rebuild the image."
 msgstr "{0} transparent PNG layer{1} for {2} layers. Each holds only its own band's pixels; stack them back-to-front to rebuild the image."
 
+#~ msgid "Layer {0} cutout"
+#~ msgstr "Layer {0} cutout"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Export format"
+msgstr "Export format"
+
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"{0} transparent PNG cut-out{1}. Cut-out k keeps\n"
+"layers 1..k (the background up to that depth) and drops everything in front — no hole\n"
+"behind the foreground."
+msgstr ""
+"{0} transparent PNG cut-out{1}. Cut-out k keeps\n"
+"layers 1..k (the background up to that depth) and drops everything in front — no hole\n"
+"behind the foreground."
+
+#. placeholder {0}: i + 1
+#. placeholder {1}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Cut-out {0} — layers 1–{1} (background kept)"
+msgstr "Cut-out {0} — layers 1–{1} (background kept)"
+
 #. placeholder {0}: i + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid "Layer {0} cutout"
-msgstr "Layer {0} cutout"
+msgid "Cut-out {0}"
+msgstr "Cut-out {0}"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Download cut-out {0}"
+msgstr "Download cut-out {0}"

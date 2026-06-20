@@ -102,19 +102,19 @@
 	// Output mode: 'cumulative' = N-1 stacked cut masks (Photoshop layer masks);
 	// 'isolated' = N standalone per-band masks (each selects one band on its own).
 	let maskMode = $state<MaskMode>('cumulative');
-	// Within isolated mode, export each band as a B&W matte or a transparent RGBA cutout.
-	// Cutouts are isolated-only — a cumulative mask spans several bands, so "cut it out"
-	// has no single-layer meaning there.
-	let isolatedExport = $state<'mask' | 'cutout'>('mask');
+	// Export each result as a B&W matte or a transparent RGBA cutout (both modes).
+	let exportFormat = $state<'mask' | 'cutout'>('mask');
 	// Default feather radius (px) stamped onto a new object override at accept time.
 	let featherRadius = $state(0);
 
 	// Source image sampled to the mask resolution; the colour data for RGBA cutouts.
 	let sourceRgba = $state.raw<Uint8ClampedArray | null>(null);
-	// Cutout export is only offered (and possible) in isolated mode with source pixels ready.
-	const showCutouts = $derived(
-		maskMode === 'isolated' && isolatedExport === 'cutout' && sourceRgba !== null
-	);
+	// Cutout export needs source pixels ready.
+	const showCutouts = $derived(exportFormat === 'cutout' && sourceRgba !== null);
+	// Cumulative masks are "in front of this cut", so cutting them out keeps the BLACK
+	// side (this band + everything behind it) → invert the alpha. Isolated masks are
+	// already "this band only", so they're used as-is.
+	const cutoutInvert = $derived(maskMode === 'cumulative');
 
 	// SAM state
 	let samCore = $state<SamCore | null>(null);
@@ -522,20 +522,28 @@
 		thresholds = next;
 	}
 
-	// Download filename noun: 'cumulative' → mask_k (stacked cut), 'isolated' → layer_k (one band).
-	const maskNoun = $derived(maskMode === 'isolated' ? 'layer' : 'mask');
+	// Download filename noun per mode + format.
+	const fileNoun = $derived(
+		showCutouts
+			? maskMode === 'cumulative'
+				? 'cutout'
+				: 'layer'
+			: maskMode === 'isolated'
+				? 'layer'
+				: 'mask'
+	);
 
 	async function downloadMask(index: number) {
 		if (!depthData) return;
 		if (showCutouts && sourceRgba) {
-			const cutout = buildLayerCutout(sourceRgba, masks[index], depthW, depthH);
+			const cutout = buildLayerCutout(sourceRgba, masks[index], depthW, depthH, cutoutInvert);
 			const cutoutUrl = await rgbaToBlobUrl(cutout, depthW, depthH);
-			downloadBlobUrl(cutoutUrl, `${sourceFileName}_layer_${index + 1}.png`);
+			downloadBlobUrl(cutoutUrl, `${sourceFileName}_${fileNoun}_${index + 1}.png`);
 			setTimeout(() => URL.revokeObjectURL(cutoutUrl), 5000);
 			return;
 		}
 		const url = await grayscaleToBlobUrl(masks[index], depthW, depthH);
-		downloadBlobUrl(url, `${sourceFileName}_${maskNoun}_${index + 1}.png`);
+		downloadBlobUrl(url, `${sourceFileName}_${fileNoun}_${index + 1}.png`);
 		// Revoke after the click handler so the download has time to start.
 		setTimeout(() => URL.revokeObjectURL(url), 5000);
 	}
@@ -553,11 +561,14 @@
 		const cutoutMode = showCutouts && sourceRgba;
 		for (let i = 0; i < masks.length; i++) {
 			if (cutoutMode) {
-				const cutout = buildLayerCutout(sourceRgba!, masks[i], depthW, depthH);
-				zip.file(`${sourceFileName}_layer_${i + 1}.png`, await rgbaToBlob(cutout, depthW, depthH));
+				const cutout = buildLayerCutout(sourceRgba!, masks[i], depthW, depthH, cutoutInvert);
+				zip.file(
+					`${sourceFileName}_${fileNoun}_${i + 1}.png`,
+					await rgbaToBlob(cutout, depthW, depthH)
+				);
 			} else {
 				const blob = await grayscaleToBlob(masks[i], depthW, depthH);
-				zip.file(`${sourceFileName}_${maskNoun}_${i + 1}.png`, blob);
+				zip.file(`${sourceFileName}_${fileNoun}_${i + 1}.png`, blob);
 			}
 		}
 		// Also include the depth map for reference.
@@ -850,31 +861,29 @@
 						</button>
 					</div>
 
-					{#if maskMode === 'isolated'}
-						<div class="export-toggle" role="radiogroup" aria-label="Isolated export format">
-							<span class="export-label">Export as:</span>
-							<button
-								class="export-btn"
-								class:active={isolatedExport === 'mask'}
-								role="radio"
-								aria-checked={isolatedExport === 'mask'}
-								onclick={() => (isolatedExport = 'mask')}
-							>
-								B&amp;W masks
-							</button>
-							<button
-								class="export-btn"
-								class:active={isolatedExport === 'cutout'}
-								role="radio"
-								aria-checked={isolatedExport === 'cutout'}
-								onclick={() => (isolatedExport = 'cutout')}
-								disabled={sourceRgba === null}
-								title={sourceRgba === null ? 'Source pixels unavailable for this image' : ''}
-							>
-								Cut-out layers (PNG)
-							</button>
-						</div>
-					{/if}
+					<div class="export-toggle" role="radiogroup" aria-label="Export format">
+						<span class="export-label">Export as:</span>
+						<button
+							class="export-btn"
+							class:active={exportFormat === 'mask'}
+							role="radio"
+							aria-checked={exportFormat === 'mask'}
+							onclick={() => (exportFormat = 'mask')}
+						>
+							B&amp;W masks
+						</button>
+						<button
+							class="export-btn"
+							class:active={exportFormat === 'cutout'}
+							role="radio"
+							aria-checked={exportFormat === 'cutout'}
+							onclick={() => (exportFormat = 'cutout')}
+							disabled={sourceRgba === null}
+							title={sourceRgba === null ? 'Source pixels unavailable for this image' : ''}
+						>
+							Cut-out layers (PNG)
+						</button>
+					</div>
 
 					{#if masksUpdating}
 						<p class="masks-updating" role="status" aria-live="polite">
@@ -883,7 +892,11 @@
 						</p>
 					{/if}
 					<p class="hint">
-						{#if showCutouts}
+						{#if showCutouts && maskMode === 'cumulative'}
+							{masks.length} transparent PNG cut-out{masks.length === 1 ? '' : 's'}. Cut-out k keeps
+							layers 1..k (the background up to that depth) and drops everything in front — no hole
+							behind the foreground.
+						{:else if showCutouts}
 							{masks.length} transparent PNG layer{masks.length === 1 ? '' : 's'} for {layers.length}
 							layers. Each holds only its own band's pixels; stack them back-to-front to rebuild the image.
 						{:else if maskMode === 'isolated'}
@@ -908,7 +921,9 @@
 						{#each masks as mask, i (i)}
 							<figure>
 								<figcaption>
-									{#if maskMode === 'isolated'}
+									{#if showCutouts && maskMode === 'cumulative'}
+										Cut-out {i + 1} — layers 1–{i + 1} (background kept)
+									{:else if maskMode === 'isolated'}
 										Layer {i + 1} — this band only
 									{:else}
 										Mask {i + 1} — covers layers 1–{i + 1}
@@ -920,13 +935,16 @@
 										{mask}
 										width={depthW}
 										height={depthH}
-										alt="Layer {i + 1} cutout"
+										invert={cutoutInvert}
+										alt="Cut-out {i + 1}"
 									/>
 								{:else}
 									<MaskCanvas {mask} width={depthW} height={depthH} alt="Mask {i + 1}" />
 								{/if}
 								<ActionButton onClick={() => downloadMask(i)} Icon={DownloadIcon}>
-									{#if maskMode === 'isolated'}
+									{#if showCutouts && maskMode === 'cumulative'}
+										Download cut-out {i + 1}
+									{:else if maskMode === 'isolated'}
 										Download layer {i + 1}
 									{:else}
 										Download mask {i + 1}

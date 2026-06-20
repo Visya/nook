@@ -222,18 +222,24 @@ export function depthToLayerMasks(
 }
 
 /**
- * Compose a layer's source pixels with its (isolated) mask into an RGBA cutout.
+ * Compose a layer's source pixels with a mask into an RGBA cutout.
  *
  * `rgba` is the source image sampled at the mask resolution (length width·height·4).
- * The result copies colour straight through and uses the mask value as alpha, so a
- * feathered mask yields a soft-edged cutout. Stacking the N cutouts back-to-front
- * reconstructs the source image.
+ * Colour is copied straight through; the mask value becomes alpha (so a feathered
+ * mask yields a soft-edged cutout).
+ *
+ * `invert` flips the alpha (`255 - mask`). With an **isolated** mask (white = one band)
+ * the default keeps just that band — the N cutouts re-stack to the source. With a
+ * **cumulative** mask (white = "in front of this cut") `invert` keeps the black side
+ * instead — "this band and everything behind it" — producing a background-preserving
+ * cutout with no hole where the foreground was.
  */
 export function buildLayerCutout(
 	rgba: Uint8ClampedArray,
 	mask: Uint8Array,
 	width: number,
-	height: number
+	height: number,
+	invert = false
 ): Uint8ClampedArray {
 	const n = width * height;
 	if (mask.length !== n) {
@@ -252,7 +258,7 @@ export function buildLayerCutout(
 		out[j] = rgba[j];
 		out[j + 1] = rgba[j + 1];
 		out[j + 2] = rgba[j + 2];
-		out[j + 3] = mask[i];
+		out[j + 3] = invert ? 255 - mask[i] : mask[i];
 	}
 	return out;
 }

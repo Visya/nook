@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-24T22:12:14.886Z\n"
-"PO-Revision-Date: 2026-06-20T23:36:15.056Z\n"
+"PO-Revision-Date: 2026-06-20T23:45:33.551Z\n"
 "Last-Translator: \n"
 "Language: es\n"
 "Language-Team: \n"
@@ -2008,9 +2008,8 @@ msgstr "Descargar capa {0}"
 msgid "Layer cutout"
 msgstr "Recorte de capa"
 
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid "Isolated export format"
-msgstr "Formato de exportación independiente"
+#~ msgid "Isolated export format"
+#~ msgstr "Formato de exportación independiente"
 
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Export as:"
@@ -2035,7 +2034,34 @@ msgstr "Capas recortadas (PNG)"
 msgid "{0} transparent PNG layer{1} for {2} layers. Each holds only its own band's pixels; stack them back-to-front to rebuild the image."
 msgstr "{0} capa{1} PNG transparente para {2} capas. Cada una contiene solo los píxeles de su banda; apílalas de atrás hacia adelante para reconstruir la imagen."
 
+#~ msgid "Layer {0} cutout"
+#~ msgstr "Recorte de la capa {0}"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Export format"
+msgstr "Formato de exportación"
+
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"{0} transparent PNG cut-out{1}. Cut-out k keeps\n"
+"layers 1..k (the background up to that depth) and drops everything in front — no hole\n"
+"behind the foreground."
+msgstr "{0} recorte{1} PNG transparente. El recorte k conserva las capas 1..k (el fondo hasta esa profundidad) y descarta todo lo que está delante, sin dejar huecos detrás del primer plano."
+
+#. placeholder {0}: i + 1
+#. placeholder {1}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Cut-out {0} — layers 1–{1} (background kept)"
+msgstr "Recorte {0} — capas 1–{1} (fondo conservado)"
+
 #. placeholder {0}: i + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid "Layer {0} cutout"
-msgstr "Recorte de la capa {0}"
+msgid "Cut-out {0}"
+msgstr "Recorte {0}"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Download cut-out {0}"
+msgstr "Descargar recorte {0}"

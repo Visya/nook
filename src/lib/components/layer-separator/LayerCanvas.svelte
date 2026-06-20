@@ -6,9 +6,11 @@
 		mask: Uint8Array;
 		width: number;
 		height: number;
+		/** Use `255 - mask` as alpha (keeps the black side — background-preserving). */
+		invert?: boolean;
 		alt?: string;
 	}
-	let { rgba, mask, width, height, alt = 'Layer cutout' }: Props = $props();
+	let { rgba, mask, width, height, invert = false, alt = 'Layer cutout' }: Props = $props();
 
 	let canvasEl: HTMLCanvasElement | undefined = $state();
 
@@ -24,7 +26,7 @@
 			imageData.data[j] = rgba[j];
 			imageData.data[j + 1] = rgba[j + 1];
 			imageData.data[j + 2] = rgba[j + 2];
-			imageData.data[j + 3] = mask[i];
+			imageData.data[j + 3] = invert ? 255 - mask[i] : mask[i];
 		}
 		ctx.putImageData(imageData, 0, 0);
 	});

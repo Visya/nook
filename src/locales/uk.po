@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T21:20:18.035Z\n"
-"PO-Revision-Date: 2026-06-20T23:36:15.060Z\n"
+"PO-Revision-Date: 2026-06-20T23:45:33.554Z\n"
 "Last-Translator: \n"
 "Language: uk\n"
 "Language-Team: \n"
@@ -2008,9 +2008,8 @@ msgstr "Завантажити шар {0}"
 msgid "Layer cutout"
 msgstr "Вирізаний шар"
 
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid "Isolated export format"
-msgstr "Формат окремого експорту"
+#~ msgid "Isolated export format"
+#~ msgstr "Формат окремого експорту"
 
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Export as:"
@@ -2035,7 +2034,34 @@ msgstr "Вирізані шари (PNG)"
 msgid "{0} transparent PNG layer{1} for {2} layers. Each holds only its own band's pixels; stack them back-to-front to rebuild the image."
 msgstr "{0} прозорий PNG-шар{1} для {2} шарів. Кожен містить лише пікселі своєї смуги; складіть їх ззаду наперед, щоб відтворити зображення."
 
+#~ msgid "Layer {0} cutout"
+#~ msgstr "Вирізаний шар {0}"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Export format"
+msgstr "Формат експорту"
+
+#. placeholder {0}: masks.length
+#. placeholder {1}: masks.length === 1 ? '' : 's'
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"{0} transparent PNG cut-out{1}. Cut-out k keeps\n"
+"layers 1..k (the background up to that depth) and drops everything in front — no hole\n"
+"behind the foreground."
+msgstr "{0} прозорих PNG-вирізів{1}. Виріз k зберігає шари 1..k (фон до цієї глибини) і прибирає все попереду — без дірки за переднім планом."
+
+#. placeholder {0}: i + 1
+#. placeholder {1}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Cut-out {0} — layers 1–{1} (background kept)"
+msgstr "Виріз {0} — шари 1–{1} (фон збережено)"
+
 #. placeholder {0}: i + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid "Layer {0} cutout"
-msgstr "Вирізаний шар {0}"
+msgid "Cut-out {0}"
+msgstr "Виріз {0}"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Download cut-out {0}"
+msgstr "Завантажити виріз {0}"
