@@ -75,6 +75,43 @@ describe('assignPixelsToLayers', () => {
 		layers[0].overrides.push({ source: 'sam-override', mask: new Uint8Array([255, 255]) });
 		expect(() => assignPixelsToLayers(new Uint8Array([0, 0, 0]), layers)).toThrow();
 	});
+
+	it('subtract override pushes its region from the layer to the layer behind', () => {
+		const layers = evenLayers(3);
+		// Depth puts pixels 2,3 in layer 2 (near). Subtract them from layer 2 → fall to layer 1.
+		layers[2].overrides.push({
+			source: 'sam-override',
+			op: 'subtract',
+			mask: new Uint8Array([0, 0, 255, 255])
+		});
+		const depth = new Uint8Array([0, 100, 200, 255]); // → layers [0, 1, 2, 2]
+		expect(Array.from(assignPixelsToLayers(depth, layers))).toEqual([0, 1, 1, 1]);
+	});
+
+	it('subtract only affects pixels actually assigned to that layer', () => {
+		const layers = evenLayers(3);
+		// Mask covers pixels 0 (layer 0) and 2 (layer 2); subtracting from layer 2 leaves pixel 0 alone.
+		layers[2].overrides.push({
+			source: 'sam-override',
+			op: 'subtract',
+			mask: new Uint8Array([255, 0, 255, 0])
+		});
+		const depth = new Uint8Array([0, 100, 200, 255]); // → [0, 1, 2, 2]
+		expect(Array.from(assignPixelsToLayers(depth, layers))).toEqual([0, 1, 1, 2]);
+	});
+
+	it('add then subtract: object forced into a layer can be carved back out', () => {
+		const layers = evenLayers(3);
+		layers[2].overrides.push({ source: 'sam-override', op: 'add', mask: new Uint8Array([255, 0]) });
+		layers[2].overrides.push({
+			source: 'sam-override',
+			op: 'subtract',
+			mask: new Uint8Array([255, 0])
+		});
+		const depth = new Uint8Array([0, 0]); // depth → layer 0
+		// add puts pixel 0 in layer 2, subtract then pushes it back to layer 1.
+		expect(Array.from(assignPixelsToLayers(depth, layers))).toEqual([1, 0]);
+	});
 });
 
 describe('buildCumulativeMasks', () => {
@@ -321,6 +358,28 @@ describe('depthToLayerMasks', () => {
 			expect(m0[i] + m1[i]).toBeGreaterThanOrEqual(254);
 			expect(m0[i] + m1[i]).toBeLessThanOrEqual(255);
 		}
+	});
+
+	it('a feathered subtract override softly moves the region to the layer behind', () => {
+		const layers = layersFromThresholds([128]); // 2 layers
+		// 4x1: depth puts all pixels in layer 1 (near). Subtract the left half (with feather)
+		// from layer 1 → it moves to layer 0, with a soft seam in the middle.
+		const depth = new Uint8Array([200, 200, 200, 200]);
+		layers[1].overrides.push({
+			source: 'sam-override',
+			op: 'subtract',
+			mask: new Uint8Array([255, 255, 0, 0]),
+			edgeRadius: 1,
+			edgeMode: 'feather'
+		});
+		const [m0, m1] = depthToLayerMasks(depth, layers, 4, 1);
+		// Far-left fully moved to layer 0; far-right stays in layer 1; soft transition between.
+		expect(m0[0]).toBe(255);
+		expect(m1[0]).toBe(0);
+		expect(m1[3]).toBe(255);
+		expect(m0[3]).toBe(0);
+		expect(m0.some((v) => v > 0 && v < 255)).toBe(true);
+		for (let i = 0; i < 4; i++) expect(m0[i] + m1[i]).toBeGreaterThanOrEqual(254);
 	});
 
 	it('does not change hard pixel ownership when an override is feathered', () => {

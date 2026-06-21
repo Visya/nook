@@ -46,7 +46,7 @@
 		type SamSession,
 		type SamPoint
 	} from '$lib/layer-separator/sam';
-	import type { EdgeMode, LayerOverride } from '$lib/layer-separator/types';
+	import type { EdgeMode, LayerOverride, OverrideOp } from '$lib/layer-separator/types';
 	import type { MaskMode, MasksResponse } from '$lib/layer-separator/masks.worker';
 
 	type DepthOutput = { depth: RawImage };
@@ -134,6 +134,8 @@
 	let samLoadProgress = $state(0);
 	let samErrorMessage = $state('');
 	let editingLayerIndex = $state<number | null>(null);
+	// Whether the current edit assigns the selection to the layer or removes it.
+	let editingOp = $state<OverrideOp>('add');
 	let pendingMask = $state<Uint8Array | null>(null);
 	let pickedPoints = $state<SamPoint[]>([]);
 	let isPredicting = $state(false);
@@ -235,6 +237,7 @@
 			overrides: l.overrides.map((o) => ({
 				source: o.source,
 				mask: o.mask,
+				op: o.op,
 				edgeRadius: o.edgeRadius,
 				edgeMode: o.edgeMode
 			}))
@@ -426,8 +429,9 @@
 		}
 	}
 
-	async function enterEdit(layerIndex: number) {
+	async function enterEdit(layerIndex: number, op: OverrideOp = 'add') {
 		editingLayerIndex = layerIndex;
+		editingOp = op;
 		pendingMask = null;
 		pickedPoints = [];
 		await ensureSamReady();
@@ -485,6 +489,7 @@
 		const override: LayerOverride = {
 			source: 'sam-override',
 			mask: pendingMask!,
+			op: editingOp,
 			edgeRadius: objectEdgeRadius,
 			edgeMode: objectEdgeMode
 		};
@@ -758,8 +763,9 @@
 					<StepHeader stepNumber={5} title="Refine with object clicks" backgroundColor="#ff69b4" />
 					<p class="hint">
 						Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).
-						Click <strong>Add object</strong> on a layer, then click that object on the image — a segmentation
-						model picks out the shape and forces it into the layer you chose.
+						Click <strong>Add object</strong> to force a shape into a layer, or
+						<strong>Remove area</strong> to push a mis-grouped region to the layer behind. Then click
+						that object on the image — a segmentation model picks out the shape.
 					</p>
 
 					<div class="layer-overrides">
@@ -778,11 +784,15 @@
 								</div>
 								<div class="layer-row-overrides">
 									{#each overridesByLayer[i] ?? [] as ov, j (j)}
-										<span class="override-chip" title={ov.source}>
-											Object {j + 1}
+										<span
+											class="override-chip"
+											class:subtract={ov.op === 'subtract'}
+											title={ov.op === 'subtract' ? 'removed area' : ov.source}
+										>
+											{ov.op === 'subtract' ? `Remove ${j + 1}` : `Object ${j + 1}`}
 											<button
 												class="chip-remove"
-												aria-label="Remove object {j + 1} from layer {i + 1}"
+												aria-label="Delete override {j + 1} from layer {i + 1}"
 												onclick={() => removeOverride(i, j)}
 											>
 												×
@@ -790,13 +800,26 @@
 										</span>
 									{/each}
 								</div>
-								<button
-									class="add-override-btn"
-									onclick={() => enterEdit(i)}
-									disabled={editingLayerIndex !== null && editingLayerIndex !== i}
-								>
-									{editingLayerIndex === i ? 'Editing…' : '+ Add object'}
-								</button>
+								<div class="override-actions">
+									<button
+										class="add-override-btn"
+										onclick={() => enterEdit(i, 'add')}
+										disabled={editingLayerIndex !== null &&
+											!(editingLayerIndex === i && editingOp === 'add')}
+									>
+										{editingLayerIndex === i && editingOp === 'add' ? 'Editing…' : '+ Add object'}
+									</button>
+									<button
+										class="add-override-btn subtract"
+										onclick={() => enterEdit(i, 'subtract')}
+										disabled={editingLayerIndex !== null &&
+											!(editingLayerIndex === i && editingOp === 'subtract')}
+									>
+										{editingLayerIndex === i && editingOp === 'subtract'
+											? 'Editing…'
+											: '− Remove area'}
+									</button>
+								</div>
 							</div>
 						{/each}
 					</div>
@@ -814,9 +837,14 @@
 								</p>
 							{:else if samStatus === 'ready' && originalImageUrl}
 								<p class="sam-instr">
-									Click anywhere on the image to build a mask for
-									<strong>Layer {editingLayerIndex + 1}</strong>. Each click refines the previous
-									result.
+									{#if editingOp === 'subtract'}
+										Click the area to <strong>remove from Layer {editingLayerIndex + 1}</strong> — those
+										pixels fall to the layer behind. Each click refines the selection.
+									{:else}
+										Click anywhere on the image to build a mask for
+										<strong>Layer {editingLayerIndex + 1}</strong>. Each click refines the previous
+										result.
+									{/if}
 								</p>
 								<SamPicker
 									imageUrl={originalImageUrl}
@@ -829,6 +857,7 @@
 									bind:edgeRadius={objectEdgeRadius}
 									bind:edgeMode={objectEdgeMode}
 									maxEdge={MAX_EDGE}
+									overlayColor={editingOp === 'subtract' ? '255, 70, 70' : '255, 105, 180'}
 								/>
 								<div class="sam-actions">
 									{#if pendingMask}
@@ -837,8 +866,15 @@
 											variant="success"
 											disabled={isPredicting}
 										>
-											Accept ({pickedPoints.length} point{pickedPoints.length === 1 ? '' : 's'}
-											→ layer {editingLayerIndex + 1})
+											{#if editingOp === 'subtract'}
+												Remove from layer {editingLayerIndex + 1} ({pickedPoints.length} point{pickedPoints.length ===
+												1
+													? ''
+													: 's'})
+											{:else}
+												Accept ({pickedPoints.length} point{pickedPoints.length === 1 ? '' : 's'}
+												→ layer {editingLayerIndex + 1})
+											{/if}
 										</ActionButton>
 									{/if}
 									{#if pickedPoints.length > 0}
@@ -1362,6 +1398,9 @@
 		font-size: 0.75rem;
 		font-weight: 700;
 	}
+	.override-chip.subtract {
+		background: #ff6b6b;
+	}
 	.chip-remove {
 		background: none;
 		border: none;
@@ -1383,6 +1422,14 @@
 		font-size: 0.8rem;
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
+	}
+	.add-override-btn.subtract {
+		background: #ff6b6b;
+	}
+	.override-actions {
+		display: flex;
+		gap: 0.4rem;
+		flex-wrap: wrap;
 	}
 	.add-override-btn:not(:disabled):hover {
 		transform: translate(-1px, -1px);

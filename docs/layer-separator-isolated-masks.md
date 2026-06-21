@@ -8,6 +8,11 @@ What shipped vs. this design:
 
 - Isolated-masks mode (`maskMode: 'cumulative' | 'isolated'`), the mask-output toggle, `buildLayerMasks`,
   `featherMask`, and `depthToLayerMasks` — all as specified.
+- Subtractive overrides: `LayerOverride.op` (`'add' | 'subtract'`). A `subtract` override removes its
+  region from the layer and pushes those pixels to the layer behind (`subtractTarget`) — only pixels
+  actually assigned to that layer move. `assignPixelsToLayers` runs additive overrides then
+  subtractive; the soft path moves `layer·alpha` to the target so feather/expand carve softly. UI: a
+  "− Remove area" button per layer (red overlay + chip) alongside "+ Add object".
 - Edge adjustment on object selection: `LayerOverride.edgeRadius` + `edgeMode` (`'feather' | 'expand'`),
   a Feather/Expand toggle + radius slider in `SamPicker` with a live preview, and soft/hard compositing
   in `depthToLayerMasks`. `featherMask` softens (box blur); `expandMask` grows the white region with a

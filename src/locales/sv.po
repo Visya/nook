@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T21:12:40.444Z\n"
-"PO-Revision-Date: 2026-06-21T14:39:53.268Z\n"
+"PO-Revision-Date: 2026-06-21T15:57:27.678Z\n"
 "Last-Translator: \n"
 "Language: sv\n"
 "Language-Team: \n"
@@ -1004,7 +1004,9 @@ msgid "Preview voice"
 msgstr "Förhandsgranska röst"
 
 #. placeholder {0}: file.name
+#. placeholder {0}: j + 1
 #: src/lib/components/background-remover/BackgroundRemoverUpload.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Remove {0}"
 msgstr "Ta bort {0}"
 
@@ -1783,17 +1785,13 @@ msgstr "närmast"
 #~ msgid "Layer {0} <0/>"
 #~ msgstr ""
 
-#. placeholder {0}: j + 1
-#. placeholder {1}: i + 1
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid "Remove object {0} from layer {1}"
-msgstr "Ta bort objekt {0} från lager {1}"
+#~ msgid "Remove object {0} from layer {1}"
+#~ msgstr "Ta bort objekt {0} från lager {1}"
 
-#. placeholder {0}: j + 1
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid "Object {0} <0>×</0>"
-msgstr "Objekt {0} <0>×</0>"
+#~ msgid "Object {0} <0>×</0>"
+#~ msgstr "Objekt {0} <0>×</0>"
 
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Editing…"
 msgstr "Redigerar…"
@@ -1824,15 +1822,14 @@ msgstr "Avbryt"
 msgid "Click on the object you want to assign to this layer"
 msgstr "Klicka på objektet du vill tilldela detta lager"
 
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid ""
-"Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).\n"
-"Click <0>Add object</0> on a layer, then click that object on the image — a segmentation\n"
-"model picks out the shape and forces it into the layer you chose."
-msgstr ""
-"Djup tolkar vissa objekt fel (t.ex. byggnaden grupperad med löven i förgrunden).\n"
-"Klicka på <0>Lägg till objekt</0> på ett lager och klicka sedan på det objektet i bilden —\n"
-"en segmenteringsmodell plockar ut formen och tvingar in den i det lager du valde."
+#~ msgid ""
+#~ "Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).\n"
+#~ "Click <0>Add object</0> on a layer, then click that object on the image — a segmentation\n"
+#~ "model picks out the shape and forces it into the layer you chose."
+#~ msgstr ""
+#~ "Djup tolkar vissa objekt fel (t.ex. byggnaden grupperad med löven i förgrunden).\n"
+#~ "Klicka på <0>Lägg till objekt</0> på ett lager och klicka sedan på det objektet i bilden —\n"
+#~ "en segmenteringsmodell plockar ut formen och tvingar in den i det lager du valde."
 
 #~ msgid "Layer {0} <0>depth {0}–{1}</0> <1/>"
 #~ msgstr ""
@@ -2133,3 +2130,34 @@ msgstr "Klicka för att zooma"
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Inspect"
 msgstr "Inspektera"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).\n"
+"Click <0>Add object</0> to force a shape into a layer, or <1>Remove area</1> to push a mis-grouped region to the layer behind. Then click\n"
+"that object on the image — a segmentation model picks out the shape."
+msgstr "Djup grupperar vissa objekt fel (t.ex. byggnaden tillsammans med förgrundens löv). Klicka på <0>Add object</0> för att tvinga in en form i ett lager, eller på <1>Remove area</1> för att skjuta en felgrupperad region till lagret bakom. Klicka sedan på objektet i bilden – en segmenteringsmodell plockar ut formen."
+
+#. placeholder {0}: j + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Object {0}"
+msgstr "Objekt {0}"
+
+#. placeholder {0}: j + 1
+#. placeholder {1}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Delete override {0} from layer {1}"
+msgstr "Ta bort element {0} från lager {1}"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"Click the area to <0>remove from Layer {0}</0> — those\n"
+"pixels fall to the layer behind. Each click refines the selection."
+msgstr "Klicka på området du vill <0>ta bort från lager {0}</0> – de pixlarna hamnar i lagret bakom. Varje klick förfinar markeringen."
+
+#. placeholder {0}: editingLayerIndex + 1
+#. placeholder {1}: pickedPoints.length
+#. placeholder {2}: pickedPoints.length === 1 ? '' : 's'
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Remove from layer {0} ({1} point{2})"
+msgstr "Ta bort från lager {0} ({1} punkt{2})"

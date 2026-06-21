@@ -1,4 +1,4 @@
-import type { EdgeMode, Layer } from './types';
+import type { EdgeMode, Layer, LayerOverride } from './types';
 
 export const DEPTH_MIN = 0;
 export const DEPTH_MAX = 256;
@@ -18,12 +18,18 @@ export function evenLayers(count: number): Layer[] {
 	return layers;
 }
 
+/** The layer a `subtract` override on layer `l` pushes its region to: behind if possible. */
+export function subtractTarget(l: number, layerCount: number): number {
+	return l > 0 ? l - 1 : Math.min(l + 1, layerCount - 1);
+}
+
 /**
  * Assign each pixel to a layer index based on depth + overrides.
  * Depth values come from a single-channel depth map (0..255).
  *
- * Overrides win over depth thresholds. When a pixel is claimed by multiple
- * overrides, the later (more foreground) layer wins.
+ * `add` overrides win over depth thresholds; when a pixel is claimed by multiple, the
+ * later (more foreground) layer wins. `subtract` overrides then run: a pixel that the
+ * mask covers and that is currently assigned to that layer is pushed to the layer behind.
  */
 export function assignPixelsToLayers(depth: Uint8Array, layers: Layer[]): Uint8Array {
 	const n = depth.length;
@@ -41,13 +47,31 @@ export function assignPixelsToLayers(depth: Uint8Array, layers: Layer[]): Uint8A
 		out[i] = layer;
 	}
 
+	const checkLen = (ov: LayerOverride) => {
+		if (ov.mask.length !== n) {
+			throw new Error(`Override mask length ${ov.mask.length} does not match depth length ${n}`);
+		}
+	};
+
+	// Additive overrides force their region into the layer (later/foreground wins).
 	for (let l = 0; l < layers.length; l++) {
 		for (const ov of layers[l].overrides) {
-			if (ov.mask.length !== n) {
-				throw new Error(`Override mask length ${ov.mask.length} does not match depth length ${n}`);
-			}
+			if ((ov.op ?? 'add') !== 'add') continue;
+			checkLen(ov);
 			for (let i = 0; i < n; i++) {
 				if (ov.mask[i] === 255) out[i] = l;
+			}
+		}
+	}
+
+	// Subtractive overrides remove their region from the layer (pixels fall to the layer behind).
+	for (let l = 0; l < layers.length; l++) {
+		const target = subtractTarget(l, layers.length);
+		for (const ov of layers[l].overrides) {
+			if ((ov.op ?? 'add') !== 'subtract') continue;
+			checkLen(ov);
+			for (let i = 0; i < n; i++) {
+				if (ov.mask[i] === 255 && out[i] === l) out[i] = target;
 			}
 		}
 	}
@@ -279,16 +303,20 @@ export function depthToLayerMasks(
 		masks[owner][i] = 255;
 	}
 
-	// Paint overrides as soft alpha-over, foreground (higher index) last so it wins ties.
+	const edgeAlpha = (ov: LayerOverride) => {
+		if (ov.mask.length !== n) {
+			throw new Error(`Override mask length ${ov.mask.length} does not match depth length ${n}`);
+		}
+		return (ov.edgeRadius ?? 0) > 0
+			? applyEdge(ov.mask, width, height, ov.edgeRadius!, ov.edgeMode ?? 'feather')
+			: ov.mask;
+	};
+
+	// Additive overrides: soft alpha-over, foreground (higher index) last so it wins ties.
 	for (let l = 0; l < layers.length; l++) {
 		for (const ov of layers[l].overrides) {
-			if (ov.mask.length !== n) {
-				throw new Error(`Override mask length ${ov.mask.length} does not match depth length ${n}`);
-			}
-			const a =
-				(ov.edgeRadius ?? 0) > 0
-					? applyEdge(ov.mask, width, height, ov.edgeRadius!, ov.edgeMode ?? 'feather')
-					: ov.mask;
+			if ((ov.op ?? 'add') !== 'add') continue;
+			const a = edgeAlpha(ov);
 			for (let i = 0; i < n; i++) {
 				const av = a[i];
 				if (av === 0) continue;
@@ -301,6 +329,23 @@ export function depthToLayerMasks(
 					if (k !== l) masks[k][i] = Math.round((masks[k][i] * inv) / 255);
 				}
 				masks[l][i] = Math.min(255, Math.round((masks[l][i] * inv) / 255) + av);
+			}
+		}
+	}
+
+	// Subtractive overrides: move layer l's alpha (scaled by the override) to the layer behind.
+	for (let l = 0; l < layers.length; l++) {
+		const target = subtractTarget(l, layers.length);
+		if (target === l) continue;
+		for (const ov of layers[l].overrides) {
+			if ((ov.op ?? 'add') !== 'subtract') continue;
+			const a = edgeAlpha(ov);
+			for (let i = 0; i < n; i++) {
+				if (a[i] === 0) continue;
+				const moved = Math.round((masks[l][i] * a[i]) / 255);
+				if (moved === 0) continue;
+				masks[l][i] -= moved;
+				masks[target][i] = Math.min(255, masks[target][i] + moved);
 			}
 		}
 	}
