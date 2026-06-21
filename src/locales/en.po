@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T12:44:06.349Z\n"
-"PO-Revision-Date: 2026-06-21T14:29:33.067Z\n"
+"PO-Revision-Date: 2026-06-21T14:39:53.209Z\n"
 "Last-Translator: \n"
 "Language: en\n"
 "Language-Team: \n"
@@ -1678,8 +1678,8 @@ msgstr "Download depth map"
 #~ "is BLACK where layers 1..k live (apply it to extract those layers in Photoshop); the frontmost\n"
 #~ "layer has no mask — it's what remains."
 
-#. placeholder {0}: i + 1
 #. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: i + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Mask {0}"
@@ -1953,9 +1953,9 @@ msgstr "Layer Separator ({0})"
 msgid "Depth Model"
 msgstr "Depth Model"
 
+#. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: inspectIndex + 1
 #. placeholder {0}: i + 1
-#. placeholder {0}: inspectIndex + 1
-#. placeholder {0}: inspectIndex + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
@@ -2085,8 +2085,8 @@ msgstr ""
 msgid "Cut-out {0} — layers 1–{1} (background kept)"
 msgstr "Cut-out {0} — layers 1–{1} (background kept)"
 
-#. placeholder {0}: i + 1
 #. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: i + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Cut-out {0}"

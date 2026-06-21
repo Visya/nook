@@ -84,7 +84,7 @@ src/routes/[[lang]]/layer-separator/
 
 - `loadSam(onProgress)` — downloads `Xenova/slimsam-77-uniform` model + processor.
 - `encodeImage(core, imageUrl)` — runs the (expensive) image encoder once per source image and caches the embeddings in a `SamSession`.
-- `predictMask(session, points)` — multi-point prompt with foreground/background labels; returns the best of the 3 candidate masks. The tensor layout is **NCHW (planar)** — mask k starts at byte `k * H * W` — not interleaved, despite some upstream examples reading it as if it were.
+- `predictMask(session, points)` — multi-point prompt with foreground/background labels. Of SAM's candidate masks it picks the one that best **honors the clicked points** (foreground points on white, background/subtract points on black), breaking ties by the model's IoU score (`chooseBestMask`). Selecting on raw IoU alone made shift+click (subtract) points appear to do nothing, since the IoU head keeps ranking the full-object mask first — especially with the pruned SlimSAM. The tensor layout is **NCHW (planar)** — mask k starts at byte `k * H * W` — not interleaved, despite some upstream examples reading it as if it were.
 
 ## Known limitations
 

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T21:20:18.035Z\n"
-"PO-Revision-Date: 2026-06-21T14:29:33.082Z\n"
+"PO-Revision-Date: 2026-06-21T14:39:53.270Z\n"
 "Last-Translator: \n"
 "Language: uk\n"
 "Language-Team: \n"
@@ -1673,8 +1673,8 @@ msgstr "Завантажити карту глибини"
 #~ "layer has no mask — it's what remains."
 #~ msgstr ""
 
-#. placeholder {0}: i + 1
 #. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: i + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Mask {0}"
@@ -1939,9 +1939,9 @@ msgstr "Розділення шарів ({0})"
 msgid "Depth Model"
 msgstr "Модель глибини"
 
+#. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: inspectIndex + 1
 #. placeholder {0}: i + 1
-#. placeholder {0}: inspectIndex + 1
-#. placeholder {0}: inspectIndex + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
@@ -2064,8 +2064,8 @@ msgstr "{0} прозорих PNG-вирізів{1}. Виріз k зберіга�
 msgid "Cut-out {0} — layers 1–{1} (background kept)"
 msgstr "Виріз {0} — шари 1–{1} (фон збережено)"
 
-#. placeholder {0}: i + 1
 #. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: i + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Cut-out {0}"

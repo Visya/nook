@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-24T22:12:14.886Z\n"
-"PO-Revision-Date: 2026-06-21T14:29:33.073Z\n"
+"PO-Revision-Date: 2026-06-21T14:39:53.259Z\n"
 "Last-Translator: \n"
 "Language: es\n"
 "Language-Team: \n"
@@ -1673,8 +1673,8 @@ msgstr "Descargar mapa de profundidad"
 #~ "layer has no mask — it's what remains."
 #~ msgstr ""
 
-#. placeholder {0}: i + 1
 #. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: i + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Mask {0}"
@@ -1939,9 +1939,9 @@ msgstr "Separador de capas ({0})"
 msgid "Depth Model"
 msgstr "Modelo de profundidad"
 
+#. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: inspectIndex + 1
 #. placeholder {0}: i + 1
-#. placeholder {0}: inspectIndex + 1
-#. placeholder {0}: inspectIndex + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
@@ -2064,8 +2064,8 @@ msgstr "{0} recorte{1} PNG transparente. El recorte k conserva las capas 1..k (e
 msgid "Cut-out {0} — layers 1–{1} (background kept)"
 msgstr "Recorte {0} — capas 1–{1} (fondo conservado)"
 
-#. placeholder {0}: i + 1
 #. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: i + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Cut-out {0}"

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T21:12:40.444Z\n"
-"PO-Revision-Date: 2026-06-21T14:29:33.080Z\n"
+"PO-Revision-Date: 2026-06-21T14:39:53.268Z\n"
 "Last-Translator: \n"
 "Language: sv\n"
 "Language-Team: \n"
@@ -1673,8 +1673,8 @@ msgstr "Ladda ner djupkarta"
 #~ "layer has no mask — it's what remains."
 #~ msgstr ""
 
-#. placeholder {0}: i + 1
 #. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: i + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Mask {0}"
@@ -1939,9 +1939,9 @@ msgstr "Lagerseparator ({0})"
 msgid "Depth Model"
 msgstr "Djupmodell"
 
+#. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: inspectIndex + 1
 #. placeholder {0}: i + 1
-#. placeholder {0}: inspectIndex + 1
-#. placeholder {0}: inspectIndex + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
@@ -2064,8 +2064,8 @@ msgstr "{0} transparent PNG-utklipp{1}. Utklipp k behåller lager 1..k (bakgrund
 msgid "Cut-out {0} — layers 1–{1} (background kept)"
 msgstr "Utklipp {0} — lager 1–{1} (bakgrund bevarad)"
 
-#. placeholder {0}: i + 1
 #. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: i + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Cut-out {0}"

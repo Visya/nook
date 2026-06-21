@@ -58,7 +58,50 @@ export interface SamPrediction {
 }
 
 /**
- * Run a multi-point prompt and return the best of the 3 candidate masks.
+ * Pick the candidate mask that best satisfies the clicked points — foreground points
+ * should land on white, background (subtract) points on black — breaking ties with the
+ * model's IoU score.
+ *
+ * SAM returns several candidate masks and the naive choice is "highest IoU". That works
+ * for a single positive click but ignores background points: the IoU head keeps ranking
+ * the full-object mask first, so shift+click (subtract) appears to do nothing. Scoring by
+ * how well each candidate respects the user's points makes negatives actually carve.
+ *
+ * `points` are in mask-pixel coordinates. `data` is planar NCHW (mask m at m·W·H).
+ */
+export function chooseBestMask(
+	data: Uint8Array | Int8Array,
+	numMasks: number,
+	width: number,
+	height: number,
+	points: { x: number; y: number; label: 0 | 1 }[],
+	iouScores: ArrayLike<number>
+): number {
+	const planeSize = width * height;
+	let best = 0;
+	let bestSatisfied = -1;
+	let bestIou = -Infinity;
+	for (let m = 0; m < numMasks; m++) {
+		let satisfied = 0;
+		for (const p of points) {
+			const mx = Math.min(width - 1, Math.max(0, Math.round(p.x)));
+			const my = Math.min(height - 1, Math.max(0, Math.round(p.y)));
+			const white = data[m * planeSize + my * width + mx] ? 1 : 0;
+			if ((p.label === 1 && white === 1) || (p.label === 0 && white === 0)) satisfied++;
+		}
+		const iou = iouScores[m] ?? 0;
+		if (satisfied > bestSatisfied || (satisfied === bestSatisfied && iou > bestIou)) {
+			best = m;
+			bestSatisfied = satisfied;
+			bestIou = iou;
+		}
+	}
+	return best;
+}
+
+/**
+ * Run a multi-point prompt and return the candidate mask that best honors the points
+ * (foreground points inside, background points outside; IoU breaks ties).
  * Coords are in original-image pixel space (NOT model/reshaped space).
  */
 export async function predictMask(session: SamSession, points: SamPoint[]): Promise<SamPrediction> {
@@ -94,8 +137,6 @@ export async function predictMask(session: SamSession, points: SamPoint[]): Prom
 
 	const scores = iou_scores.data as Float32Array;
 	const numMasks = scores.length;
-	let best = 0;
-	for (let i = 1; i < numMasks; i++) if (scores[i] > scores[best]) best = i;
 
 	// post_process_masks returns masks[batch] = Tensor with dims [1, numMasks, H, W].
 	// Memory layout is NCHW (planar): mask k occupies bytes [k*H*W .. (k+1)*H*W).
@@ -105,6 +146,15 @@ export async function predictMask(session: SamSession, points: SamPoint[]): Prom
 	const W = dims[dims.length - 1];
 	const data = tensor.data as Uint8Array | Int8Array;
 	const planeSize = H * W;
+
+	// Choose by point satisfaction (so subtract points carve), not raw IoU. Points are in
+	// original-image space; the mask is post-processed back to original size (W≈origW).
+	const choicePoints = points.map((p) => ({
+		x: (p.x / origW) * W,
+		y: (p.y / origH) * H,
+		label: p.label
+	}));
+	const best = chooseBestMask(data, numMasks, W, H, choicePoints, scores);
 	const offset = best * planeSize;
 
 	const bin = new Uint8Array(planeSize);
