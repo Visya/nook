@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T12:44:06.349Z\n"
-"PO-Revision-Date: 2026-06-20T23:45:33.549Z\n"
+"PO-Revision-Date: 2026-06-21T14:29:33.067Z\n"
 "Last-Translator: \n"
 "Language: en\n"
 "Language-Team: \n"
@@ -1588,6 +1588,7 @@ msgstr "Type your message..."
 msgid "Processing..."
 msgstr "Processing..."
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/routes/+layout.svelte
 msgid "Escape"
 msgstr "Escape"
@@ -1678,6 +1679,8 @@ msgstr "Download depth map"
 #~ "layer has no mask — it's what remains."
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Mask {0}"
 msgstr "Mask {0}"
@@ -1868,6 +1871,7 @@ msgstr "Accept ({0} point{1} → layer {2})"
 msgid "Clear points"
 msgstr "Clear points"
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom out"
 msgstr "Zoom out"
@@ -1876,6 +1880,7 @@ msgstr "Zoom out"
 msgid "Fit to width"
 msgstr "Fit to width"
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom in"
 msgstr "Zoom in"
@@ -1949,6 +1954,10 @@ msgid "Depth Model"
 msgstr "Depth Model"
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Layer {0}"
 msgstr "Layer {0}"
@@ -1965,9 +1974,8 @@ msgstr "Segmenting object"
 msgid "<0/> Segmenting…"
 msgstr "<0/> Segmenting…"
 
-#: src/lib/components/layer-separator/SamPicker.svelte
-msgid "Feather <0/> <1>{0}px</1>"
-msgstr "Feather <0/> <1>{0}px</1>"
+#~ msgid "Feather <0/> <1>{0}px</1>"
+#~ msgstr "Feather <0/> <1>{0}px</1>"
 
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid ""
@@ -2078,6 +2086,8 @@ msgid "Cut-out {0} — layers 1–{1} (background kept)"
 msgstr "Cut-out {0} — layers 1–{1} (background kept)"
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Cut-out {0}"
 msgstr "Cut-out {0}"
@@ -2086,3 +2096,61 @@ msgstr "Cut-out {0}"
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Download cut-out {0}"
 msgstr "Download cut-out {0}"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Object edge mode"
+msgstr "Object edge mode"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Feather"
+msgstr "Feather"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Expand"
+msgstr "Expand"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Edge radius"
+msgstr "Edge radius"
+
+#. placeholder {0}: edgeRadius
+#. placeholder {0}: layerEdgeRadius
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "{0}px"
+msgstr "{0}px"
+
+#: src/lib/components/layer-separator/MaskInspector.svelte
+msgid "Close"
+msgstr "Close"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Edge:"
+msgstr "Edge:"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer edge mode"
+msgstr "Layer edge mode"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer edge radius"
+msgstr "Layer edge radius"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Click to inspect closer"
+msgstr "Click to inspect closer"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Inspect result {0}"
+msgstr "Inspect result {0}"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Click to zoom"
+msgstr "Click to zoom"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Inspect"
+msgstr "Inspect"

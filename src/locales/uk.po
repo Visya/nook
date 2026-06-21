@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T21:20:18.035Z\n"
-"PO-Revision-Date: 2026-06-20T23:45:33.554Z\n"
+"PO-Revision-Date: 2026-06-21T14:29:33.082Z\n"
 "Last-Translator: \n"
 "Language: uk\n"
 "Language-Team: \n"
@@ -1588,6 +1588,7 @@ msgstr ""
 msgid "Processing..."
 msgstr ""
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/routes/+layout.svelte
 msgid "Escape"
 msgstr ""
@@ -1673,6 +1674,8 @@ msgstr "Завантажити карту глибини"
 #~ msgstr ""
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Mask {0}"
 msgstr "Маска {0}"
@@ -1856,6 +1859,7 @@ msgstr "Підтвердити ({0} точ{1} → шар {2})"
 msgid "Clear points"
 msgstr "Очистити точки"
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom out"
 msgstr "Зменшити"
@@ -1864,6 +1868,7 @@ msgstr "Зменшити"
 msgid "Fit to width"
 msgstr "За шириною"
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom in"
 msgstr "Збільшити"
@@ -1935,6 +1940,10 @@ msgid "Depth Model"
 msgstr "Модель глибини"
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Layer {0}"
 msgstr "Шар {0}"
@@ -1951,9 +1960,8 @@ msgstr "Сегментування об'єкта"
 msgid "<0/> Segmenting…"
 msgstr "<0/> Сегментування…"
 
-#: src/lib/components/layer-separator/SamPicker.svelte
-msgid "Feather <0/> <1>{0}px</1>"
-msgstr "Розтушовка <0/> <1>{0}px</1>"
+#~ msgid "Feather <0/> <1>{0}px</1>"
+#~ msgstr "Розтушовка <0/> <1>{0}px</1>"
 
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid ""
@@ -2057,6 +2065,8 @@ msgid "Cut-out {0} — layers 1–{1} (background kept)"
 msgstr "Виріз {0} — шари 1–{1} (фон збережено)"
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Cut-out {0}"
 msgstr "Виріз {0}"
@@ -2065,3 +2075,61 @@ msgstr "Виріз {0}"
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Download cut-out {0}"
 msgstr "Завантажити виріз {0}"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Object edge mode"
+msgstr "Режим краю об'єкта"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Feather"
+msgstr "Розтушовка"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Expand"
+msgstr "Розширити"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Edge radius"
+msgstr "Радіус краю"
+
+#. placeholder {0}: edgeRadius
+#. placeholder {0}: layerEdgeRadius
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "{0}px"
+msgstr "{0}px"
+
+#: src/lib/components/layer-separator/MaskInspector.svelte
+msgid "Close"
+msgstr "Закрити"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Edge:"
+msgstr "Край:"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer edge mode"
+msgstr "Режим краю шару"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer edge radius"
+msgstr "Радіус краю шару"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Click to inspect closer"
+msgstr "Натисніть, щоб роздивитися ближче"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Inspect result {0}"
+msgstr "Інспектувати результат {0}"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Click to zoom"
+msgstr "Натисніть, щоб збільшити"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Inspect"
+msgstr "Інспектувати"

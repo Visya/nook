@@ -1,4 +1,4 @@
-import type { Layer } from './types';
+import type { EdgeMode, Layer } from './types';
 
 export const DEPTH_MIN = 0;
 export const DEPTH_MAX = 256;
@@ -157,6 +157,92 @@ export function featherMask(
 }
 
 /**
+ * Grow a binary mask's white region by `radius` pixels with **hard** edges (morphological
+ * dilation, square structuring element). Unlike `featherMask` this keeps a crisp 0/255 edge
+ * — use it to "choke out" a couple of pixels rather than soften.
+ *
+ * Implemented as a separable count-in-window (zero-padded out of bounds): a pixel becomes
+ * white if any source pixel within the radius is white. radius ≤ 0 returns a copy unchanged.
+ */
+export function expandMask(
+	mask: Uint8Array,
+	width: number,
+	height: number,
+	radius: number
+): Uint8Array {
+	const n = width * height;
+	if (mask.length !== n) {
+		throw new Error(`expandMask: mask length ${mask.length} does not match ${width}×${height}`);
+	}
+	const r = Math.round(radius);
+	if (r <= 0) return mask.slice();
+
+	// Horizontal pass: count of white pixels in [x-r, x+r] (out-of-bounds counts as 0).
+	const tmp = new Float32Array(n);
+	for (let y = 0; y < height; y++) {
+		const row = y * width;
+		let sum = 0;
+		for (let k = 0; k <= r && k < width; k++) sum += mask[row + k] ? 1 : 0;
+		tmp[row] = sum;
+		for (let x = 1; x < width; x++) {
+			const add = x + r;
+			const rem = x - r - 1;
+			if (add < width) sum += mask[row + add] ? 1 : 0;
+			if (rem >= 0) sum -= mask[row + rem] ? 1 : 0;
+			tmp[row + x] = sum;
+		}
+	}
+	// Vertical pass over the counts: white if any white fell in the square neighborhood.
+	const out = new Uint8Array(n);
+	for (let x = 0; x < width; x++) {
+		let sum = 0;
+		for (let k = 0; k <= r && k < height; k++) sum += tmp[k * width + x];
+		out[x] = sum > 0 ? 255 : 0;
+		for (let y = 1; y < height; y++) {
+			const add = y + r;
+			const rem = y - r - 1;
+			if (add < height) sum += tmp[add * width + x];
+			if (rem >= 0) sum -= tmp[rem * width + x];
+			out[y * width + x] = sum > 0 ? 255 : 0;
+		}
+	}
+	return out;
+}
+
+/**
+ * Grow a mask edge by `radius` px, either softly (`feather`) or with a hard dilation
+ * (`expand`). radius ≤ 0 returns a copy unchanged.
+ */
+export function applyEdge(
+	mask: Uint8Array,
+	width: number,
+	height: number,
+	radius: number,
+	mode: EdgeMode
+): Uint8Array {
+	if (Math.round(radius) <= 0) return mask.slice();
+	return mode === 'expand'
+		? expandMask(mask, width, height, radius)
+		: featherMask(mask, width, height, radius);
+}
+
+/**
+ * Apply a single edge adjustment (feather or expand) to every mask in a set — used to
+ * grow/soften the final layer masks themselves, independent of any per-object edge.
+ * radius ≤ 0 returns the input array unchanged.
+ */
+export function applyEdgeToMasks(
+	masks: Uint8Array[],
+	width: number,
+	height: number,
+	radius: number,
+	mode: EdgeMode
+): Uint8Array[] {
+	if (Math.round(radius) <= 0) return masks;
+	return masks.map((m) => applyEdge(m, width, height, radius, mode));
+}
+
+/**
  * Depth map → isolated per-layer masks.
  *
  * When no override carries a feather radius (or dimensions are unknown) this is just
@@ -174,8 +260,8 @@ export function depthToLayerMasks(
 	height = 0
 ): Uint8Array[] {
 	const n = depth.length;
-	const hasFeather = layers.some((l) => l.overrides.some((o) => (o.featherRadius ?? 0) > 0));
-	if (!hasFeather || width * height !== n) {
+	const hasEdge = layers.some((l) => l.overrides.some((o) => (o.edgeRadius ?? 0) > 0));
+	if (!hasEdge || width * height !== n) {
 		return buildLayerMasks(assignPixelsToLayers(depth, layers), layers.length);
 	}
 
@@ -200,8 +286,8 @@ export function depthToLayerMasks(
 				throw new Error(`Override mask length ${ov.mask.length} does not match depth length ${n}`);
 			}
 			const a =
-				(ov.featherRadius ?? 0) > 0
-					? featherMask(ov.mask, width, height, ov.featherRadius!)
+				(ov.edgeRadius ?? 0) > 0
+					? applyEdge(ov.mask, width, height, ov.edgeRadius!, ov.edgeMode ?? 'feather')
 					: ov.mask;
 			for (let i = 0; i < n; i++) {
 				const av = a[i];

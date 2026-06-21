@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { SamPoint } from '$lib/layer-separator/sam';
-	import { featherMask } from '$lib/layer-separator/masks';
+	import { applyEdge } from '$lib/layer-separator/masks';
+	import type { EdgeMode } from '$lib/layer-separator/types';
 	import ZoomInIcon from 'virtual:icons/lucide/zoom-in';
 	import ZoomOutIcon from 'virtual:icons/lucide/zoom-out';
 
@@ -12,8 +13,9 @@
 		points: SamPoint[];
 		isPredicting: boolean;
 		onPick: (x: number, y: number, label: 0 | 1) => void;
-		featherRadius?: number;
-		maxFeather?: number;
+		edgeRadius?: number;
+		edgeMode?: EdgeMode;
+		maxEdge?: number;
 		overlayColor?: string;
 	}
 
@@ -25,8 +27,9 @@
 		points,
 		isPredicting,
 		onPick,
-		featherRadius = $bindable(0),
-		maxFeather = 32,
+		edgeRadius = $bindable(0),
+		edgeMode = $bindable<EdgeMode>('feather'),
+		maxEdge = 32,
 		overlayColor = '255, 105, 180'
 	}: Props = $props();
 
@@ -62,12 +65,12 @@
 		zoom = 1;
 	}
 
-	// Preview reflects the feather radius so the user sees the softened edge before
-	// accepting. `featherMask` is cheap relative to SAM inference.
+	// Preview reflects the edge radius/mode so the user sees the softened or grown edge
+	// before accepting. `applyEdge` is cheap relative to SAM inference.
 	const previewMask = $derived.by(() => {
 		if (!pendingMask) return null;
-		return featherRadius > 0
-			? featherMask(pendingMask, maskWidth, maskHeight, featherRadius)
+		return edgeRadius > 0
+			? applyEdge(pendingMask, maskWidth, maskHeight, edgeRadius, edgeMode)
 			: pendingMask;
 	});
 
@@ -112,18 +115,42 @@
 		>
 			<ZoomInIcon />
 		</button>
-		<label class="feather-control">
-			Feather
+		<div class="edge-control">
+			<div class="edge-mode" role="radiogroup" aria-label="Object edge mode">
+				<button
+					type="button"
+					class="edge-mode-btn"
+					class:active={edgeMode === 'feather'}
+					role="radio"
+					aria-checked={edgeMode === 'feather'}
+					onclick={() => (edgeMode = 'feather')}
+					disabled={isPredicting}
+				>
+					Feather
+				</button>
+				<button
+					type="button"
+					class="edge-mode-btn"
+					class:active={edgeMode === 'expand'}
+					role="radio"
+					aria-checked={edgeMode === 'expand'}
+					onclick={() => (edgeMode = 'expand')}
+					disabled={isPredicting}
+				>
+					Expand
+				</button>
+			</div>
 			<input
 				type="range"
 				min="0"
-				max={maxFeather}
+				max={maxEdge}
 				step="1"
-				bind:value={featherRadius}
+				bind:value={edgeRadius}
 				disabled={isPredicting}
+				aria-label="Edge radius"
 			/>
-			<span class="feather-value">{featherRadius}px</span>
-		</label>
+			<span class="edge-value">{edgeRadius}px</span>
+		</div>
 	</div>
 	<div class="scroll-container">
 		<div class="image-wrap" style:width="{zoom * 100}%">
@@ -175,30 +202,48 @@
 		align-items: center;
 		flex-wrap: wrap;
 	}
-	.feather-control {
+	.edge-control {
 		display: flex;
 		align-items: center;
 		gap: 0.4rem;
 		margin-left: 0.5rem;
+	}
+	.edge-mode {
+		display: flex;
+	}
+	.edge-mode-btn {
+		padding: 0.3rem 0.5rem;
+		background: #f0f0f0;
+		border: 2px solid #000;
 		font-weight: 700;
-		font-size: 0.8rem;
+		font-size: 0.72rem;
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
-	}
-	.feather-control input[type='range'] {
-		width: 6rem;
 		cursor: pointer;
+		font-family: inherit;
 	}
-	.feather-control input:disabled {
+	.edge-mode-btn + .edge-mode-btn {
+		border-left: none;
+	}
+	.edge-mode-btn.active {
+		background: #ffd93d;
+	}
+	.edge-mode-btn:disabled {
 		opacity: 0.4;
 		cursor: not-allowed;
 	}
-	.feather-value {
+	.edge-control input[type='range'] {
+		width: 5rem;
+		cursor: pointer;
+	}
+	.edge-control input:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+	.edge-value {
 		min-width: 2.6rem;
 		font-family: monospace;
-		font-weight: 400;
-		text-transform: none;
-		letter-spacing: 0;
+		font-size: 0.8rem;
 		color: #555;
 	}
 	.zoom-btn {

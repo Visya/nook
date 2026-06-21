@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-24T22:12:14.886Z\n"
-"PO-Revision-Date: 2026-06-20T23:45:33.551Z\n"
+"PO-Revision-Date: 2026-06-21T14:29:33.073Z\n"
 "Last-Translator: \n"
 "Language: es\n"
 "Language-Team: \n"
@@ -1588,6 +1588,7 @@ msgstr ""
 msgid "Processing..."
 msgstr ""
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/routes/+layout.svelte
 msgid "Escape"
 msgstr ""
@@ -1673,6 +1674,8 @@ msgstr "Descargar mapa de profundidad"
 #~ msgstr ""
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Mask {0}"
 msgstr "Máscara {0}"
@@ -1856,6 +1859,7 @@ msgstr "Aceptar ({0} punto{1} → capa {2})"
 msgid "Clear points"
 msgstr "Borrar puntos"
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom out"
 msgstr "Reducir zoom"
@@ -1864,6 +1868,7 @@ msgstr "Reducir zoom"
 msgid "Fit to width"
 msgstr "Ajustar al ancho"
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom in"
 msgstr "Aumentar zoom"
@@ -1935,6 +1940,10 @@ msgid "Depth Model"
 msgstr "Modelo de profundidad"
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Layer {0}"
 msgstr "Capa {0}"
@@ -1951,9 +1960,8 @@ msgstr "Segmentando objeto"
 msgid "<0/> Segmenting…"
 msgstr "<0/> Segmentando…"
 
-#: src/lib/components/layer-separator/SamPicker.svelte
-msgid "Feather <0/> <1>{0}px</1>"
-msgstr "Calar <0/> <1>{0}px</1>"
+#~ msgid "Feather <0/> <1>{0}px</1>"
+#~ msgstr "Calar <0/> <1>{0}px</1>"
 
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid ""
@@ -2057,6 +2065,8 @@ msgid "Cut-out {0} — layers 1–{1} (background kept)"
 msgstr "Recorte {0} — capas 1–{1} (fondo conservado)"
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Cut-out {0}"
 msgstr "Recorte {0}"
@@ -2065,3 +2075,61 @@ msgstr "Recorte {0}"
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Download cut-out {0}"
 msgstr "Descargar recorte {0}"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Object edge mode"
+msgstr "Modo de borde del objeto"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Feather"
+msgstr "Calar"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Expand"
+msgstr "Expandir"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Edge radius"
+msgstr "Radio del borde"
+
+#. placeholder {0}: edgeRadius
+#. placeholder {0}: layerEdgeRadius
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "{0}px"
+msgstr "{0}px"
+
+#: src/lib/components/layer-separator/MaskInspector.svelte
+msgid "Close"
+msgstr "Cerrar"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Edge:"
+msgstr "Borde:"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer edge mode"
+msgstr "Modo de borde de capa"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer edge radius"
+msgstr "Radio del borde de capa"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Click to inspect closer"
+msgstr "Haz clic para inspeccionar de cerca"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Inspect result {0}"
+msgstr "Inspeccionar resultado {0}"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Click to zoom"
+msgstr "Clic para ampliar"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Inspect"
+msgstr "Inspeccionar"

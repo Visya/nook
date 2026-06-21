@@ -6,6 +6,9 @@ import {
 	buildLayerMasks,
 	buildLayerCutout,
 	featherMask,
+	expandMask,
+	applyEdge,
+	applyEdgeToMasks,
 	depthToLayerMasks,
 	depthToMasks,
 	evenThresholds,
@@ -180,6 +183,65 @@ describe('featherMask', () => {
 	});
 });
 
+describe('expandMask', () => {
+	it('radius 0 returns an unchanged copy', () => {
+		const mask = new Uint8Array([0, 255, 0, 0]);
+		const out = expandMask(mask, 2, 2, 0);
+		expect(Array.from(out)).toEqual([0, 255, 0, 0]);
+		expect(out).not.toBe(mask);
+	});
+
+	it('grows a single white pixel into its neighborhood with hard edges', () => {
+		// 5x5, single white center at index 12. Dilate by 1 → 3x3 block white, rest black.
+		const mask = new Uint8Array(25);
+		mask[12] = 255;
+		const out = expandMask(mask, 5, 5, 1);
+		const white = new Set([6, 7, 8, 11, 12, 13, 16, 17, 18]);
+		for (let i = 0; i < 25; i++) {
+			expect(out[i]).toBe(white.has(i) ? 255 : 0);
+		}
+	});
+
+	it('only produces 0 or 255 (hard edge, no soft ramp)', () => {
+		const mask = new Uint8Array([255, 255, 0, 0, 0, 0]);
+		const out = expandMask(mask, 6, 1, 1);
+		for (const v of out) expect(v === 0 || v === 255).toBe(true);
+		// The black side adjacent to white grows by one pixel.
+		expect(out[2]).toBe(255);
+		expect(out[3]).toBe(0);
+	});
+});
+
+describe('applyEdge', () => {
+	it('dispatches to feather (soft) vs expand (hard)', () => {
+		const mask = new Uint8Array([255, 255, 255, 0, 0, 0]);
+		const soft = applyEdge(mask, 6, 1, 1, 'feather');
+		const hard = applyEdge(mask, 6, 1, 1, 'expand');
+		expect(soft.some((v) => v > 0 && v < 255)).toBe(true); // ramp
+		for (const v of hard) expect(v === 0 || v === 255).toBe(true); // crisp
+	});
+
+	it('radius 0 is identity (copy) for both modes', () => {
+		const mask = new Uint8Array([0, 255, 0, 255]);
+		expect(Array.from(applyEdge(mask, 2, 2, 0, 'feather'))).toEqual([0, 255, 0, 255]);
+		expect(Array.from(applyEdge(mask, 2, 2, 0, 'expand'))).toEqual([0, 255, 0, 255]);
+	});
+});
+
+describe('applyEdgeToMasks', () => {
+	it('returns the same array reference when radius is 0', () => {
+		const masks = [new Uint8Array([0, 255]), new Uint8Array([255, 0])];
+		expect(applyEdgeToMasks(masks, 2, 1, 0, 'feather')).toBe(masks);
+	});
+
+	it('applies the edge to every mask', () => {
+		const masks = [new Uint8Array([255, 0, 0, 0]), new Uint8Array([0, 0, 0, 255])];
+		const out = applyEdgeToMasks(masks, 4, 1, 1, 'expand');
+		expect(out[0][1]).toBe(255); // grew right from pixel 0
+		expect(out[1][2]).toBe(255); // grew left from pixel 3
+	});
+});
+
 describe('buildLayerCutout', () => {
 	it('copies colour straight through and uses the mask as alpha', () => {
 		// 2x1 image: red, green. Mask keeps pixel 0 fully, drops pixel 1.
@@ -249,7 +311,8 @@ describe('depthToLayerMasks', () => {
 		layers[1].overrides.push({
 			source: 'sam-override',
 			mask: new Uint8Array([255, 255, 0, 0]),
-			featherRadius: 1
+			edgeRadius: 1,
+			edgeMode: 'feather'
 		});
 		const [m0, m1] = depthToLayerMasks(depth, layers, 4, 1);
 		// Soft seam: at least one pixel is partial (not 0/255) in each mask.
@@ -266,7 +329,8 @@ describe('depthToLayerMasks', () => {
 		layers[1].overrides.push({
 			source: 'sam-override',
 			mask: new Uint8Array([255, 0, 0, 0]),
-			featherRadius: 2
+			edgeRadius: 2,
+			edgeMode: 'feather'
 		});
 		// Ownership (used by cumulative mode) is unaffected by feather: pixel 0 → layer 1.
 		expect(Array.from(assignPixelsToLayers(depth, layers))).toEqual([1, 0, 0, 0]);

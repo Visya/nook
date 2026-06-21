@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T21:12:40.444Z\n"
-"PO-Revision-Date: 2026-06-20T23:45:33.553Z\n"
+"PO-Revision-Date: 2026-06-21T14:29:33.080Z\n"
 "Last-Translator: \n"
 "Language: sv\n"
 "Language-Team: \n"
@@ -1588,6 +1588,7 @@ msgstr ""
 msgid "Processing..."
 msgstr ""
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/routes/+layout.svelte
 msgid "Escape"
 msgstr ""
@@ -1673,6 +1674,8 @@ msgstr "Ladda ner djupkarta"
 #~ msgstr ""
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Mask {0}"
 msgstr "Mask {0}"
@@ -1856,6 +1859,7 @@ msgstr "Godkänn ({0} punkt{1} → lager {2})"
 msgid "Clear points"
 msgstr "Rensa punkter"
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom out"
 msgstr "Zooma ut"
@@ -1864,6 +1868,7 @@ msgstr "Zooma ut"
 msgid "Fit to width"
 msgstr "Anpassa till bredd"
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom in"
 msgstr "Zooma in"
@@ -1935,6 +1940,10 @@ msgid "Depth Model"
 msgstr "Djupmodell"
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Layer {0}"
 msgstr "Lager {0}"
@@ -1951,9 +1960,8 @@ msgstr "Segmenterar objekt"
 msgid "<0/> Segmenting…"
 msgstr "<0/> Segmenterar…"
 
-#: src/lib/components/layer-separator/SamPicker.svelte
-msgid "Feather <0/> <1>{0}px</1>"
-msgstr "Ludd <0/> <1>{0}px</1>"
+#~ msgid "Feather <0/> <1>{0}px</1>"
+#~ msgstr "Ludd <0/> <1>{0}px</1>"
 
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid ""
@@ -2057,6 +2065,8 @@ msgid "Cut-out {0} — layers 1–{1} (background kept)"
 msgstr "Utklipp {0} — lager 1–{1} (bakgrund bevarad)"
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Cut-out {0}"
 msgstr "Utklipp {0}"
@@ -2065,3 +2075,61 @@ msgstr "Utklipp {0}"
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Download cut-out {0}"
 msgstr "Ladda ner utklipp {0}"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Object edge mode"
+msgstr "Objektets kantläge"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Feather"
+msgstr "Ludd"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Expand"
+msgstr "Utvidga"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Edge radius"
+msgstr "Kantradie"
+
+#. placeholder {0}: edgeRadius
+#. placeholder {0}: layerEdgeRadius
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "{0}px"
+msgstr "{0}px"
+
+#: src/lib/components/layer-separator/MaskInspector.svelte
+msgid "Close"
+msgstr "Stäng"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Edge:"
+msgstr "Kant:"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer edge mode"
+msgstr "Lagrets kantläge"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer edge radius"
+msgstr "Lagrets kantradie"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Click to inspect closer"
+msgstr "Klicka för att inspektera närmare"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Inspect result {0}"
+msgstr "Inspektera resultat {0}"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Click to zoom"
+msgstr "Klicka för att zooma"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Inspect"
+msgstr "Inspektera"

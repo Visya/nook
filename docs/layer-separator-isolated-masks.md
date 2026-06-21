@@ -8,9 +8,16 @@ What shipped vs. this design:
 
 - Isolated-masks mode (`maskMode: 'cumulative' | 'isolated'`), the mask-output toggle, `buildLayerMasks`,
   `featherMask`, and `depthToLayerMasks` — all as specified.
-- Feather on object selection: `LayerOverride.featherRadius`, a slider in `SamPicker` with a soft live
-  preview, and soft alpha-over compositing in `depthToLayerMasks`.
-- Worker carries `mode` + `width`/`height`; isolated downloads are named `…_layer_k.png`.
+- Edge adjustment on object selection: `LayerOverride.edgeRadius` + `edgeMode` (`'feather' | 'expand'`),
+  a Feather/Expand toggle + radius slider in `SamPicker` with a live preview, and soft/hard compositing
+  in `depthToLayerMasks`. `featherMask` softens (box blur); `expandMask` grows the white region with a
+  hard edge (separable dilation); `applyEdge` dispatches between them.
+- Layer-mask edge: the same Feather/Expand + radius control applied to the **final masks themselves**
+  (`applyEdgeToMasks`), independent of any per-object edge — for growing/softening every output mask.
+- Inspect/zoom: `MaskInspector.svelte` — click any result tile (or "Inspect") to open a zoomable
+  (1×–8×, pixelated) overlay of that mask/cutout.
+- Worker carries `mode` + `width`/`height` + the layer `edgeRadius`/`edgeMode`; isolated downloads are
+  named `…_layer_k.png`.
 - **Layer-cutout export** (the additive feature): an "Export as: B&W masks / Cut-out layers (PNG)"
   sub-toggle, available in **both** modes. `buildLayerCutout` composites the source pixels with a
   mask as alpha; `rgbaToBlob`/`rgbaToBlobUrl` write transparent PNGs; `LayerCanvas.svelte` previews
@@ -21,8 +28,8 @@ What shipped vs. this design:
   - **Cumulative**: cut with `invert` so each cutout keeps "this band **and everything behind it**"
     (the black side of the "in front of this cut" mask). Background-preserving, no hole behind the
     foreground — the standard stacked-document / parallax / relight workflow.
-- **Deferred** (still additive follow-ups): per-layer (depth-seam) feather; matte de-fringe; a
-  layered-document (PSD/AE) exporter; a reconstruct-the-stack preview.
+- **Deferred** (still additive follow-ups): matte de-fringe; a layered-document (PSD/AE) exporter; a
+  reconstruct-the-stack preview; pan (not just scroll) in the inspector.
 
 ## Motivation
 

@@ -18,12 +18,14 @@
 
 	import MaskCanvas from '$lib/components/layer-separator/MaskCanvas.svelte';
 	import LayerCanvas from '$lib/components/layer-separator/LayerCanvas.svelte';
+	import MaskInspector from '$lib/components/layer-separator/MaskInspector.svelte';
 	import DepthHistogram from '$lib/components/layer-separator/DepthHistogram.svelte';
 	import SamPicker from '$lib/components/layer-separator/SamPicker.svelte';
 	import {
 		depthToMasks,
 		depthToLayerMasks,
 		buildLayerCutout,
+		applyEdgeToMasks,
 		depthHistogram,
 		evenThresholds,
 		layersFromThresholds,
@@ -44,7 +46,7 @@
 		type SamSession,
 		type SamPoint
 	} from '$lib/layer-separator/sam';
-	import type { LayerOverride } from '$lib/layer-separator/types';
+	import type { EdgeMode, LayerOverride } from '$lib/layer-separator/types';
 	import type { MaskMode, MasksResponse } from '$lib/layer-separator/masks.worker';
 
 	type DepthOutput = { depth: RawImage };
@@ -104,8 +106,17 @@
 	let maskMode = $state<MaskMode>('cumulative');
 	// Export each result as a B&W matte or a transparent RGBA cutout (both modes).
 	let exportFormat = $state<'mask' | 'cutout'>('mask');
-	// Default feather radius (px) stamped onto a new object override at accept time.
-	let featherRadius = $state(0);
+	// Edge applied to a new object selection (stamped onto the override at accept time).
+	let objectEdgeRadius = $state(0);
+	let objectEdgeMode = $state<EdgeMode>('feather');
+	// Edge applied to the final layer masks themselves (after assignment), independent
+	// of any per-object edge.
+	let layerEdgeRadius = $state(0);
+	let layerEdgeMode = $state<EdgeMode>('feather');
+	const MAX_EDGE = MAX_FEATHER;
+
+	// Open mask/cutout inspector (index into `masks`, or null when closed).
+	let inspectIndex = $state<number | null>(null);
 
 	// Source image sampled to the mask resolution; the colour data for RGBA cutouts.
 	let sourceRgba = $state.raw<Uint8ClampedArray | null>(null);
@@ -186,10 +197,11 @@
 					workerFailed = true;
 					masksWorker = null;
 					if (depthData) {
-						masks =
+						const base =
 							maskMode === 'isolated'
 								? depthToLayerMasks(depthData, layers, depthW, depthH)
 								: depthToMasks(depthData, layers);
+						masks = applyEdgeToMasks(base, depthW, depthH, layerEdgeRadius, layerEdgeMode);
 					}
 					isComputingMasks = false;
 				};
@@ -207,6 +219,8 @@
 		const mode = maskMode;
 		const width = depthW;
 		const height = depthH;
+		const edgeRadius = layerEdgeRadius;
+		const edgeMode = layerEdgeMode;
 		if (!depth) {
 			masks = [];
 			isComputingMasks = false;
@@ -221,18 +235,31 @@
 			overrides: l.overrides.map((o) => ({
 				source: o.source,
 				mask: o.mask,
-				featherRadius: o.featherRadius
+				edgeRadius: o.edgeRadius,
+				edgeMode: o.edgeMode
 			}))
 		}));
 
-		const compute = () =>
-			mode === 'isolated'
-				? depthToLayerMasks(depth, payloadLayers, width, height)
-				: depthToMasks(depth, payloadLayers);
+		const compute = () => {
+			const base =
+				mode === 'isolated'
+					? depthToLayerMasks(depth, payloadLayers, width, height)
+					: depthToMasks(depth, payloadLayers);
+			return applyEdgeToMasks(base, width, height, edgeRadius, edgeMode);
+		};
 
 		const worker = ensureMasksWorker();
 		if (worker) {
-			worker.postMessage({ id, depth, layers: payloadLayers, mode, width, height });
+			worker.postMessage({
+				id,
+				depth,
+				layers: payloadLayers,
+				mode,
+				width,
+				height,
+				edgeRadius,
+				edgeMode
+			});
 			return;
 		}
 
@@ -458,7 +485,8 @@
 		const override: LayerOverride = {
 			source: 'sam-override',
 			mask: pendingMask!,
-			featherRadius
+			edgeRadius: objectEdgeRadius,
+			edgeMode: objectEdgeMode
 		};
 		const next = overridesByLayer.map((arr, i) => (i === idx ? [...arr, override] : arr));
 		overridesByLayer = next;
@@ -798,8 +826,9 @@
 									points={pickedPoints}
 									{isPredicting}
 									onPick={handleSamClick}
-									bind:featherRadius
-									maxFeather={MAX_FEATHER}
+									bind:edgeRadius={objectEdgeRadius}
+									bind:edgeMode={objectEdgeMode}
+									maxEdge={MAX_EDGE}
 								/>
 								<div class="sam-actions">
 									{#if pendingMask}
@@ -885,6 +914,44 @@
 						</button>
 					</div>
 
+					<div class="layer-edge">
+						<span class="export-label">Edge:</span>
+						<div class="edge-mode" role="radiogroup" aria-label="Layer edge mode">
+							<button
+								class="edge-mode-btn"
+								class:active={layerEdgeMode === 'feather'}
+								role="radio"
+								aria-checked={layerEdgeMode === 'feather'}
+								onclick={() => (layerEdgeMode = 'feather')}
+							>
+								Feather
+							</button>
+							<button
+								class="edge-mode-btn"
+								class:active={layerEdgeMode === 'expand'}
+								role="radio"
+								aria-checked={layerEdgeMode === 'expand'}
+								onclick={() => (layerEdgeMode = 'expand')}
+							>
+								Expand
+							</button>
+						</div>
+						<input
+							type="range"
+							min="0"
+							max={MAX_EDGE}
+							step="1"
+							bind:value={layerEdgeRadius}
+							aria-label="Layer edge radius"
+						/>
+						<span class="edge-value">{layerEdgeRadius}px</span>
+						<span class="hint edge-hint">
+							{layerEdgeMode === 'expand'
+								? 'grows every mask outward (hard edge)'
+								: 'softens every mask edge'}
+						</span>
+					</div>
+
 					{#if masksUpdating}
 						<p class="masks-updating" role="status" aria-live="polite">
 							<span class="mini-spinner" aria-hidden="true"></span>
@@ -929,27 +996,38 @@
 										Mask {i + 1} — covers layers 1–{i + 1}
 									{/if}
 								</figcaption>
-								{#if showCutouts && sourceRgba}
-									<LayerCanvas
-										rgba={sourceRgba}
-										{mask}
-										width={depthW}
-										height={depthH}
-										invert={cutoutInvert}
-										alt="Cut-out {i + 1}"
-									/>
-								{:else}
-									<MaskCanvas {mask} width={depthW} height={depthH} alt="Mask {i + 1}" />
-								{/if}
-								<ActionButton onClick={() => downloadMask(i)} Icon={DownloadIcon}>
-									{#if showCutouts && maskMode === 'cumulative'}
-										Download cut-out {i + 1}
-									{:else if maskMode === 'isolated'}
-										Download layer {i + 1}
+								<button
+									class="inspect-canvas"
+									onclick={() => (inspectIndex = i)}
+									title="Click to inspect closer"
+									aria-label="Inspect result {i + 1}"
+								>
+									{#if showCutouts && sourceRgba}
+										<LayerCanvas
+											rgba={sourceRgba}
+											{mask}
+											width={depthW}
+											height={depthH}
+											invert={cutoutInvert}
+											alt="Cut-out {i + 1}"
+										/>
 									{:else}
-										Download mask {i + 1}
+										<MaskCanvas {mask} width={depthW} height={depthH} alt="Mask {i + 1}" />
 									{/if}
-								</ActionButton>
+									<span class="inspect-badge" aria-hidden="true">Click to zoom</span>
+								</button>
+								<div class="figure-actions">
+									<ActionButton onClick={() => downloadMask(i)} Icon={DownloadIcon}>
+										{#if showCutouts && maskMode === 'cumulative'}
+											Download cut-out {i + 1}
+										{:else if maskMode === 'isolated'}
+											Download layer {i + 1}
+										{:else}
+											Download mask {i + 1}
+										{/if}
+									</ActionButton>
+									<button class="link-btn" onclick={() => (inspectIndex = i)}>Inspect</button>
+								</div>
 							</figure>
 						{/each}
 					</div>
@@ -957,6 +1035,25 @@
 			{/if}
 		</ContentArea>
 	</CardInterface>
+{/if}
+
+{#if inspectIndex !== null && masks[inspectIndex]}
+	<MaskInspector
+		title={showCutouts
+			? maskMode === 'cumulative'
+				? `Cut-out ${inspectIndex + 1}`
+				: `Layer ${inspectIndex + 1}`
+			: maskMode === 'isolated'
+				? `Layer ${inspectIndex + 1}`
+				: `Mask ${inspectIndex + 1}`}
+		mask={masks[inspectIndex]}
+		width={depthW}
+		height={depthH}
+		rgba={sourceRgba}
+		cutout={showCutouts}
+		invert={cutoutInvert}
+		onClose={() => (inspectIndex = null)}
+	/>
 {/if}
 
 <style>
@@ -1111,6 +1208,82 @@
 	.export-btn:disabled {
 		opacity: 0.4;
 		cursor: not-allowed;
+	}
+	.layer-edge {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		margin: 0 0 1rem;
+	}
+	.edge-mode {
+		display: flex;
+	}
+	.edge-mode-btn {
+		padding: 0.3rem 0.6rem;
+		background: #f0f0f0;
+		border: 2px solid #000;
+		font-weight: 700;
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		cursor: pointer;
+		font-family: inherit;
+	}
+	.edge-mode-btn + .edge-mode-btn {
+		border-left: none;
+	}
+	.edge-mode-btn.active {
+		background: #ffd93d;
+	}
+	.layer-edge input[type='range'] {
+		width: 7rem;
+		cursor: pointer;
+	}
+	.edge-value {
+		font-family: monospace;
+		font-size: 0.8rem;
+		color: #555;
+		min-width: 2.6rem;
+	}
+	.edge-hint {
+		margin: 0;
+		text-align: left;
+	}
+	.inspect-canvas {
+		position: relative;
+		display: block;
+		padding: 0;
+		border: none;
+		background: none;
+		cursor: zoom-in;
+		font-family: inherit;
+		width: 100%;
+	}
+	.inspect-badge {
+		position: absolute;
+		top: 0.4rem;
+		right: 0.4rem;
+		background: #000;
+		color: #fff;
+		font-size: 0.65rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		padding: 0.15rem 0.4rem;
+		opacity: 0;
+		transition: opacity 0.12s ease;
+		pointer-events: none;
+	}
+	.inspect-canvas:hover .inspect-badge,
+	.inspect-canvas:focus-visible .inspect-badge {
+		opacity: 1;
+	}
+	.figure-actions {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		flex-wrap: wrap;
 	}
 	.mode-desc {
 		font-size: 0.75rem;

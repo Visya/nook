@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-24T22:41:34.932Z\n"
-"PO-Revision-Date: 2026-06-20T23:45:33.552Z\n"
+"PO-Revision-Date: 2026-06-21T14:29:33.077Z\n"
 "Last-Translator: \n"
 "Language: ja\n"
 "Language-Team: \n"
@@ -1588,6 +1588,7 @@ msgstr ""
 msgid "Processing..."
 msgstr ""
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/routes/+layout.svelte
 msgid "Escape"
 msgstr ""
@@ -1673,6 +1674,8 @@ msgstr "深度マップをダウンロード"
 #~ msgstr ""
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Mask {0}"
 msgstr "マスク {0}"
@@ -1856,6 +1859,7 @@ msgstr "確定 ({0} 個の点{1} → レイヤー {2})"
 msgid "Clear points"
 msgstr "点をクリア"
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom out"
 msgstr "ズームアウト"
@@ -1864,6 +1868,7 @@ msgstr "ズームアウト"
 msgid "Fit to width"
 msgstr "幅に合わせる"
 
+#: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom in"
 msgstr "ズームイン"
@@ -1935,6 +1940,10 @@ msgid "Depth Model"
 msgstr "深度モデル"
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Layer {0}"
 msgstr "レイヤー {0}"
@@ -1951,9 +1960,8 @@ msgstr "オブジェクトをセグメント化"
 msgid "<0/> Segmenting…"
 msgstr "<0/> セグメント化中…"
 
-#: src/lib/components/layer-separator/SamPicker.svelte
-msgid "Feather <0/> <1>{0}px</1>"
-msgstr "ぼかし <0/> <1>{0}px</1>"
+#~ msgid "Feather <0/> <1>{0}px</1>"
+#~ msgstr "ぼかし <0/> <1>{0}px</1>"
 
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid ""
@@ -2057,6 +2065,8 @@ msgid "Cut-out {0} — layers 1–{1} (background kept)"
 msgstr "切り抜き{0} — レイヤー1–{1}（背景を保持）"
 
 #. placeholder {0}: i + 1
+#. placeholder {0}: inspectIndex + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Cut-out {0}"
 msgstr "切り抜き{0}"
@@ -2065,3 +2075,61 @@ msgstr "切り抜き{0}"
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Download cut-out {0}"
 msgstr "切り抜き{0}をダウンロード"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Object edge mode"
+msgstr "オブジェクトのエッジモード"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Feather"
+msgstr "ぼかし"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Expand"
+msgstr "拡張"
+
+#: src/lib/components/layer-separator/SamPicker.svelte
+msgid "Edge radius"
+msgstr "エッジ半径"
+
+#. placeholder {0}: edgeRadius
+#. placeholder {0}: layerEdgeRadius
+#: src/lib/components/layer-separator/SamPicker.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "{0}px"
+msgstr "{0}px"
+
+#: src/lib/components/layer-separator/MaskInspector.svelte
+msgid "Close"
+msgstr "閉じる"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Edge:"
+msgstr "エッジ:"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer edge mode"
+msgstr "レイヤーのエッジモード"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Layer edge radius"
+msgstr "レイヤーのエッジ半径"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Click to inspect closer"
+msgstr "クリックして拡大表示"
+
+#. placeholder {0}: i + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Inspect result {0}"
+msgstr "結果{0}を拡大表示"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Click to zoom"
+msgstr "クリックで拡大"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Inspect"
+msgstr "拡大表示"
