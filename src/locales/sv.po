@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T21:12:40.444Z\n"
-"PO-Revision-Date: 2026-06-21T15:57:27.678Z\n"
+"PO-Revision-Date: 2026-06-21T22:03:32.603Z\n"
 "Last-Translator: \n"
 "Language: sv\n"
 "Language-Team: \n"
@@ -1793,6 +1793,7 @@ msgstr "närmast"
 
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Editing…"
 msgstr "Redigerar…"
 
@@ -1814,6 +1815,7 @@ msgstr "Förbereder bild…"
 #~ msgid "Try another point"
 #~ msgstr ""
 
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Cancel"
 msgstr "Avbryt"
@@ -1856,6 +1858,7 @@ msgstr "Godkänn ({0} punkt{1} → lager {2})"
 msgid "Clear points"
 msgstr "Rensa punkter"
 
+#: src/lib/components/layer-separator/BrushPicker.svelte
 #: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom out"
@@ -1865,6 +1868,7 @@ msgstr "Zooma ut"
 msgid "Fit to width"
 msgstr "Anpassa till bredd"
 
+#: src/lib/components/layer-separator/BrushPicker.svelte
 #: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom in"
@@ -2077,22 +2081,27 @@ msgstr "Ladda ner utklipp {0}"
 msgid "Object edge mode"
 msgstr "Objektets kantläge"
 
+#: src/lib/components/layer-separator/BrushPicker.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Feather"
 msgstr "Ludd"
 
+#: src/lib/components/layer-separator/BrushPicker.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Expand"
 msgstr "Utvidga"
 
+#: src/lib/components/layer-separator/BrushPicker.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Edge radius"
 msgstr "Kantradie"
 
 #. placeholder {0}: edgeRadius
+#. placeholder {0}: edgeRadius
 #. placeholder {0}: layerEdgeRadius
+#: src/lib/components/layer-separator/BrushPicker.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "{0}px"
@@ -2131,12 +2140,11 @@ msgstr "Klicka för att zooma"
 msgid "Inspect"
 msgstr "Inspektera"
 
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid ""
-"Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).\n"
-"Click <0>Add object</0> to force a shape into a layer, or <1>Remove area</1> to push a mis-grouped region to the layer behind. Then click\n"
-"that object on the image — a segmentation model picks out the shape."
-msgstr "Djup grupperar vissa objekt fel (t.ex. byggnaden tillsammans med förgrundens löv). Klicka på <0>Add object</0> för att tvinga in en form i ett lager, eller på <1>Remove area</1> för att skjuta en felgrupperad region till lagret bakom. Klicka sedan på objektet i bilden – en segmenteringsmodell plockar ut formen."
+#~ msgid ""
+#~ "Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).\n"
+#~ "Click <0>Add object</0> to force a shape into a layer, or <1>Remove area</1> to push a mis-grouped region to the layer behind. Then click\n"
+#~ "that object on the image — a segmentation model picks out the shape."
+#~ msgstr "Djup grupperar vissa objekt fel (t.ex. byggnaden tillsammans med förgrundens löv). Klicka på <0>Add object</0> för att tvinga in en form i ett lager, eller på <1>Remove area</1> för att skjuta en felgrupperad region till lagret bakom. Klicka sedan på objektet i bilden – en segmenteringsmodell plockar ut formen."
 
 #. placeholder {0}: j + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
@@ -2161,3 +2169,110 @@ msgstr "Klicka på området du vill <0>ta bort från lager {0}</0> – de pixlar
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Remove from layer {0} ({1} point{2})"
 msgstr "Ta bort från lager {0} ({1} punkt{2})"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "Brush mode"
+msgstr "Penselläge"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "<0/> Paint"
+msgstr "<0/> Måla"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "<0/> Erase"
+msgstr "<0/> Radera"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "Brush size"
+msgstr "Penselstorlek"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "Brush <0/> <1>{0}px</1>"
+msgstr "Pensel <0/> <1>{0}px</1>"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "Brush edge mode"
+msgstr "Penselns kantläge"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "Paint over the area you want to reassign"
+msgstr "Måla över området du vill omfördela"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "Clear"
+msgstr "Rensa"
+
+#~ msgid "<0>Drag</0> to paint · <1>Erase</1> trims the selection · zoom to refine small areas <2/>"
+#~ msgstr ""
+
+#. placeholder {0}: j + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Brush {0}"
+msgstr "Pensel {0}"
+
+#~ msgid ""
+#~ "Paint over the part of <0>Layer {0}</0> you want to\n"
+#~ "reassign, then pick the destination mask below. Painting into the same layer just\n"
+#~ "extends it."
+#~ msgstr ""
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Destination layer"
+msgstr "Mållager"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Reassign to:"
+msgstr "Omfördela till:"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "this"
+msgstr "denna"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "↓ farther"
+msgstr "↓ längre bort"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "↑ nearer"
+msgstr "↑ närmare"
+
+#. placeholder {0}: t + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "L{0}<0/>"
+msgstr "L{0}<0/>"
+
+#. placeholder {0}: editingTarget + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Add to layer {0}"
+msgstr "Lägg till i lager {0}"
+
+#. placeholder {0}: editingTarget + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Move to layer {0}"
+msgstr "Flytta till lager {0}"
+
+#~ msgid ""
+#~ "Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).\n"
+#~ "Click <0>Add object</0> to force a shape into a layer, or <1>Remove area</1> to push a mis-grouped region to the layer behind — both use a\n"
+#~ "segmentation model that snaps to the object you click. Or use <2>Brush mask</2> to paint a region freehand and reassign it to any mask, up or down."
+#~ msgstr ""
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid ""
+"<0>Drag</0> to paint · <1>Erase</1> trims the selection · zoom to refine\n"
+"small areas <2/>"
+msgstr "<0>Dra</0> för att måla · <1>Radera</1> trimmar markeringen · zooma för att finjustera små områden <2/>"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).\n"
+"Click <0>Add object</0> to force a shape into a layer, or <1>Remove area</1> to push a mis-grouped region to the layer behind — both use\n"
+"a segmentation model that snaps to the object you click. Or use <2>Brush mask</2> to paint a region freehand and reassign it to any mask, up or\n"
+"down."
+msgstr "Djupet grupperar vissa objekt fel (t.ex. byggnaden ihop med löven i förgrunden). Klicka på <0>Lägg till objekt</0> för att tvinga in en form i ett lager, eller <1>Ta bort område</1> för att skjuta en felgrupperad region till lagret bakom — båda använder en segmenteringsmodell som fäster vid objektet du klickar på. Eller använd <2>Måla mask</2> för att måla ett område på fri hand och omfördela det till valfri mask, framåt eller bakåt."
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"Paint over the part of <0>Layer {0}</0> you want to reassign,\n"
+"then pick the destination mask below. Painting into the same layer just extends it."
+msgstr "Måla över den del av <0>Lager {0}</0> du vill omfördela och välj sedan målmasken nedan. Att måla i samma lager utökar det bara."

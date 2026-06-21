@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-08-25T21:20:18.035Z\n"
-"PO-Revision-Date: 2026-06-21T15:57:27.679Z\n"
+"PO-Revision-Date: 2026-06-21T22:03:32.604Z\n"
 "Last-Translator: \n"
 "Language: uk\n"
 "Language-Team: \n"
@@ -1793,6 +1793,7 @@ msgstr "найближчий"
 
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Editing…"
 msgstr "Редагування…"
 
@@ -1814,6 +1815,7 @@ msgstr "Підготовка зображення…"
 #~ msgid "Try another point"
 #~ msgstr ""
 
+#: src/routes/[[lang]]/layer-separator/+page.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Cancel"
 msgstr "Скасувати"
@@ -1856,6 +1858,7 @@ msgstr "Підтвердити ({0} точ{1} → шар {2})"
 msgid "Clear points"
 msgstr "Очистити точки"
 
+#: src/lib/components/layer-separator/BrushPicker.svelte
 #: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom out"
@@ -1865,6 +1868,7 @@ msgstr "Зменшити"
 msgid "Fit to width"
 msgstr "За шириною"
 
+#: src/lib/components/layer-separator/BrushPicker.svelte
 #: src/lib/components/layer-separator/MaskInspector.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Zoom in"
@@ -2077,22 +2081,27 @@ msgstr "Завантажити виріз {0}"
 msgid "Object edge mode"
 msgstr "Режим краю об'єкта"
 
+#: src/lib/components/layer-separator/BrushPicker.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Feather"
 msgstr "Розтушовка"
 
+#: src/lib/components/layer-separator/BrushPicker.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Expand"
 msgstr "Розширити"
 
+#: src/lib/components/layer-separator/BrushPicker.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 msgid "Edge radius"
 msgstr "Радіус краю"
 
 #. placeholder {0}: edgeRadius
+#. placeholder {0}: edgeRadius
 #. placeholder {0}: layerEdgeRadius
+#: src/lib/components/layer-separator/BrushPicker.svelte
 #: src/lib/components/layer-separator/SamPicker.svelte
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "{0}px"
@@ -2131,12 +2140,11 @@ msgstr "Натисніть, щоб збільшити"
 msgid "Inspect"
 msgstr "Інспектувати"
 
-#: src/routes/[[lang]]/layer-separator/+page.svelte
-msgid ""
-"Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).\n"
-"Click <0>Add object</0> to force a shape into a layer, or <1>Remove area</1> to push a mis-grouped region to the layer behind. Then click\n"
-"that object on the image — a segmentation model picks out the shape."
-msgstr "Глибина неправильно групує деякі об'єкти (напр., будівля разом із листям переднього плану). Натисніть <0>Add object</0>, щоб помістити форму в шар, або <1>Remove area</1>, щоб перемістити неправильно згруповану ділянку на шар позаду. Потім натисніть на цей об'єкт на зображенні — модель сегментації виділить форму."
+#~ msgid ""
+#~ "Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).\n"
+#~ "Click <0>Add object</0> to force a shape into a layer, or <1>Remove area</1> to push a mis-grouped region to the layer behind. Then click\n"
+#~ "that object on the image — a segmentation model picks out the shape."
+#~ msgstr "Глибина неправильно групує деякі об'єкти (напр., будівля разом із листям переднього плану). Натисніть <0>Add object</0>, щоб помістити форму в шар, або <1>Remove area</1>, щоб перемістити неправильно згруповану ділянку на шар позаду. Потім натисніть на цей об'єкт на зображенні — модель сегментації виділить форму."
 
 #. placeholder {0}: j + 1
 #: src/routes/[[lang]]/layer-separator/+page.svelte
@@ -2161,3 +2169,110 @@ msgstr "Натисніть на ділянку, яку потрібно <0>ви�
 #: src/routes/[[lang]]/layer-separator/+page.svelte
 msgid "Remove from layer {0} ({1} point{2})"
 msgstr "Видалити з шару {0} ({1} точк{2})"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "Brush mode"
+msgstr "Режим пензля"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "<0/> Paint"
+msgstr "<0/> Малювати"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "<0/> Erase"
+msgstr "<0/> Стерти"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "Brush size"
+msgstr "Розмір пензля"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "Brush <0/> <1>{0}px</1>"
+msgstr "Пензель <0/> <1>{0}px</1>"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "Brush edge mode"
+msgstr "Режим краю пензля"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "Paint over the area you want to reassign"
+msgstr "Замалюйте область, яку хочете перепризначити"
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid "Clear"
+msgstr "Очистити"
+
+#~ msgid "<0>Drag</0> to paint · <1>Erase</1> trims the selection · zoom to refine small areas <2/>"
+#~ msgstr ""
+
+#. placeholder {0}: j + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Brush {0}"
+msgstr "Пензель {0}"
+
+#~ msgid ""
+#~ "Paint over the part of <0>Layer {0}</0> you want to\n"
+#~ "reassign, then pick the destination mask below. Painting into the same layer just\n"
+#~ "extends it."
+#~ msgstr ""
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Destination layer"
+msgstr "Цільовий шар"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Reassign to:"
+msgstr "Перепризначити на:"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "this"
+msgstr "цей"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "↓ farther"
+msgstr "↓ далі"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "↑ nearer"
+msgstr "↑ ближче"
+
+#. placeholder {0}: t + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "L{0}<0/>"
+msgstr "L{0}<0/>"
+
+#. placeholder {0}: editingTarget + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Add to layer {0}"
+msgstr "Додати до шару {0}"
+
+#. placeholder {0}: editingTarget + 1
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid "Move to layer {0}"
+msgstr "Перемістити до шару {0}"
+
+#~ msgid ""
+#~ "Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).\n"
+#~ "Click <0>Add object</0> to force a shape into a layer, or <1>Remove area</1> to push a mis-grouped region to the layer behind — both use a\n"
+#~ "segmentation model that snaps to the object you click. Or use <2>Brush mask</2> to paint a region freehand and reassign it to any mask, up or down."
+#~ msgstr ""
+
+#: src/lib/components/layer-separator/BrushPicker.svelte
+msgid ""
+"<0>Drag</0> to paint · <1>Erase</1> trims the selection · zoom to refine\n"
+"small areas <2/>"
+msgstr "<0>Перетягуйте</0>, щоб малювати · <1>Стерти</1> обрізає виділення · масштабуйте для дрібних областей <2/>"
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).\n"
+"Click <0>Add object</0> to force a shape into a layer, or <1>Remove area</1> to push a mis-grouped region to the layer behind — both use\n"
+"a segmentation model that snaps to the object you click. Or use <2>Brush mask</2> to paint a region freehand and reassign it to any mask, up or\n"
+"down."
+msgstr "Глибина деякі об'єкти групує неправильно (напр. будівлю разом із листям переднього плану). Натисніть <0>Додати об'єкт</0>, щоб помістити форму в шар, або <1>Вилучити область</1>, щоб перемістити неправильно згруповану область до шару позаду — обидва використовують модель сегментації, що прилипає до об'єкта, на який ви клацнули. Або скористайтеся <2>Пензлем маски</2>, щоб намалювати область вручну та перепризначити її на будь-яку маску, ближче чи далі."
+
+#: src/routes/[[lang]]/layer-separator/+page.svelte
+msgid ""
+"Paint over the part of <0>Layer {0}</0> you want to reassign,\n"
+"then pick the destination mask below. Painting into the same layer just extends it."
+msgstr "Замалюйте частину <0>Шару {0}</0>, яку хочете перепризначити, потім виберіть цільову маску нижче. Малювання в тому ж шарі просто розширює його."

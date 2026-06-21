@@ -13,6 +13,14 @@ What shipped vs. this design:
   actually assigned to that layer move. `assignPixelsToLayers` runs additive overrides then
   subtractive; the soft path moves `layer·alpha` to the target so feather/expand carve softly. UI: a
   "− Remove area" button per layer (red overlay + chip) alongside "+ Add object".
+- Freehand brush ("✎ Brush mask"): a manual alternative to SAM for fixing a mask by hand. `BrushPicker.svelte`
+  paints a region directly (round brush, adjustable size, paint/erase strokes, zoom, the layer's current
+  mask shown faintly underneath as a guide) and a **destination** selector reassigns the painted region to
+  **any** mask — farther (down), nearer (up), or the same layer (touch-up). It needs no segmentation model.
+  Implementation reuses the existing math: the brush stamps an additive `source: 'paint'` override on the
+  chosen destination layer, and `assignPixelsToLayers` already forces an add-region into its layer over
+  depth in either direction — so no mask/worker changes were required. The per-object `edgeRadius`/`edgeMode`
+  (feather/expand) apply to brush strokes too.
 - Edge adjustment on object selection: `LayerOverride.edgeRadius` + `edgeMode` (`'feather' | 'expand'`),
   a Feather/Expand toggle + radius slider in `SamPicker` with a live preview, and soft/hard compositing
   in `depthToLayerMasks`. `featherMask` softens (box blur); `expandMask` grows the white region with a

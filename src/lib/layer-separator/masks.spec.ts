@@ -100,6 +100,24 @@ describe('assignPixelsToLayers', () => {
 		expect(Array.from(assignPixelsToLayers(depth, layers))).toEqual([0, 1, 1, 2]);
 	});
 
+	it('paint override reassigns a near region to a farther layer (brush sends down)', () => {
+		const layers = evenLayers(3);
+		// Depth puts both pixels in the near layer 2; a paint override on layer 0 pulls
+		// pixel 0 back to the far layer (a brush "move down").
+		layers[0].overrides.push({ source: 'paint', op: 'add', mask: new Uint8Array([255, 0]) });
+		const depth = new Uint8Array([200, 200]); // → [2, 2]
+		expect(Array.from(assignPixelsToLayers(depth, layers))).toEqual([0, 2]);
+	});
+
+	it('paint override reassigns a far region to a nearer layer (brush sends up)', () => {
+		const layers = evenLayers(3);
+		// Depth puts both pixels in the far layer 0; a paint override on layer 2 pushes
+		// pixel 0 forward (a brush "move up").
+		layers[2].overrides.push({ source: 'paint', op: 'add', mask: new Uint8Array([255, 0]) });
+		const depth = new Uint8Array([0, 0]); // → [0, 0]
+		expect(Array.from(assignPixelsToLayers(depth, layers))).toEqual([2, 0]);
+	});
+
 	it('add then subtract: object forced into a layer can be carved back out', () => {
 		const layers = evenLayers(3);
 		layers[2].overrides.push({ source: 'sam-override', op: 'add', mask: new Uint8Array([255, 0]) });

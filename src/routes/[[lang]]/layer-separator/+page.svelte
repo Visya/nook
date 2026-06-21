@@ -21,11 +21,13 @@
 	import MaskInspector from '$lib/components/layer-separator/MaskInspector.svelte';
 	import DepthHistogram from '$lib/components/layer-separator/DepthHistogram.svelte';
 	import SamPicker from '$lib/components/layer-separator/SamPicker.svelte';
+	import BrushPicker from '$lib/components/layer-separator/BrushPicker.svelte';
 	import {
 		depthToMasks,
 		depthToLayerMasks,
 		buildLayerCutout,
 		applyEdgeToMasks,
+		assignPixelsToLayers,
 		depthHistogram,
 		evenThresholds,
 		layersFromThresholds,
@@ -136,6 +138,13 @@
 	let editingLayerIndex = $state<number | null>(null);
 	// Whether the current edit assigns the selection to the layer or removes it.
 	let editingOp = $state<OverrideOp>('add');
+	// 'sam' = click-to-segment; 'brush' = freehand paint with a destination layer.
+	let editingTool = $state<'sam' | 'brush'>('sam');
+	// Destination layer for a brush edit (which mask the painted region is assigned to).
+	let editingTarget = $state(0);
+	let brushSize = $state(20);
+	// Snapshot of the edited layer's current mask, shown under the brush as a guide.
+	let brushReference = $state.raw<Uint8Array | null>(null);
 	let pendingMask = $state<Uint8Array | null>(null);
 	let pickedPoints = $state<SamPoint[]>([]);
 	let isPredicting = $state(false);
@@ -431,14 +440,37 @@
 
 	async function enterEdit(layerIndex: number, op: OverrideOp = 'add') {
 		editingLayerIndex = layerIndex;
+		editingTool = 'sam';
 		editingOp = op;
 		pendingMask = null;
 		pickedPoints = [];
 		await ensureSamReady();
 	}
 
+	// Isolated mask of a single layer from the current assignment — the brush guide.
+	function layerReferenceMask(layerIndex: number): Uint8Array | null {
+		if (!depthData) return null;
+		const pixelLayers = assignPixelsToLayers(depthData, layers);
+		const m = new Uint8Array(pixelLayers.length);
+		for (let i = 0; i < pixelLayers.length; i++) m[i] = pixelLayers[i] === layerIndex ? 255 : 0;
+		return m;
+	}
+
+	// Freehand brush edit. Needs no segmentation model — just the source image.
+	function enterBrush(layerIndex: number) {
+		editingLayerIndex = layerIndex;
+		editingTool = 'brush';
+		editingOp = 'add';
+		editingTarget = layerIndex;
+		brushReference = layerReferenceMask(layerIndex);
+		pendingMask = null;
+		pickedPoints = [];
+	}
+
 	function cancelEdit() {
 		editingLayerIndex = null;
+		editingTool = 'sam';
+		brushReference = null;
 		pendingMask = null;
 		pickedPoints = [];
 		isPredicting = false;
@@ -485,17 +517,24 @@
 
 	function acceptOverride() {
 		if (editingLayerIndex === null || !pendingMask) return;
-		const idx = editingLayerIndex;
+		// A brush stamps an additive 'paint' override onto its destination layer: the
+		// painted pixels are assigned to that mask (which removes them from wherever they
+		// were), so it works as a reassign — up or down — and as a same-layer touch-up.
+		const targetLayer = editingTool === 'brush' ? editingTarget : editingLayerIndex;
 		const override: LayerOverride = {
-			source: 'sam-override',
+			source: editingTool === 'brush' ? 'paint' : 'sam-override',
 			mask: pendingMask!,
-			op: editingOp,
+			op: editingTool === 'brush' ? 'add' : editingOp,
 			edgeRadius: objectEdgeRadius,
 			edgeMode: objectEdgeMode
 		};
-		const next = overridesByLayer.map((arr, i) => (i === idx ? [...arr, override] : arr));
+		const next = overridesByLayer.map((arr, i) => (i === targetLayer ? [...arr, override] : arr));
 		overridesByLayer = next;
 		cancelEdit();
+	}
+
+	function handleBrushChange(mask: Uint8Array | null) {
+		pendingMask = mask;
 	}
 
 	function clearPoints() {
@@ -549,6 +588,8 @@
 		layerCount = n;
 		// If we were editing a layer that no longer exists, cancel.
 		if (editingLayerIndex !== null && editingLayerIndex >= n) cancelEdit();
+		// Keep the brush destination within range.
+		if (editingTarget >= n) editingTarget = n - 1;
 	}
 
 	function onThresholdsChange(next: number[]) {
@@ -764,8 +805,10 @@
 					<p class="hint">
 						Depth gets some objects wrong (e.g. the building grouped with the foreground leaves).
 						Click <strong>Add object</strong> to force a shape into a layer, or
-						<strong>Remove area</strong> to push a mis-grouped region to the layer behind. Then click
-						that object on the image — a segmentation model picks out the shape.
+						<strong>Remove area</strong> to push a mis-grouped region to the layer behind — both use
+						a segmentation model that snaps to the object you click. Or use
+						<strong>Brush mask</strong> to paint a region freehand and reassign it to any mask, up or
+						down.
 					</p>
 
 					<div class="layer-overrides">
@@ -787,9 +830,18 @@
 										<span
 											class="override-chip"
 											class:subtract={ov.op === 'subtract'}
-											title={ov.op === 'subtract' ? 'removed area' : ov.source}
+											class:paint={ov.source === 'paint'}
+											title={ov.source === 'paint'
+												? 'painted area'
+												: ov.op === 'subtract'
+													? 'removed area'
+													: ov.source}
 										>
-											{ov.op === 'subtract' ? `Remove ${j + 1}` : `Object ${j + 1}`}
+											{ov.source === 'paint'
+												? `Brush ${j + 1}`
+												: ov.op === 'subtract'
+													? `Remove ${j + 1}`
+													: `Object ${j + 1}`}
 											<button
 												class="chip-remove"
 												aria-label="Delete override {j + 1} from layer {i + 1}"
@@ -805,26 +857,97 @@
 										class="add-override-btn"
 										onclick={() => enterEdit(i, 'add')}
 										disabled={editingLayerIndex !== null &&
-											!(editingLayerIndex === i && editingOp === 'add')}
+											!(editingLayerIndex === i && editingOp === 'add' && editingTool === 'sam')}
 									>
-										{editingLayerIndex === i && editingOp === 'add' ? 'Editing…' : '+ Add object'}
+										{editingLayerIndex === i && editingOp === 'add' && editingTool === 'sam'
+											? 'Editing…'
+											: '+ Add object'}
 									</button>
 									<button
 										class="add-override-btn subtract"
 										onclick={() => enterEdit(i, 'subtract')}
 										disabled={editingLayerIndex !== null &&
-											!(editingLayerIndex === i && editingOp === 'subtract')}
+											!(
+												editingLayerIndex === i &&
+												editingOp === 'subtract' &&
+												editingTool === 'sam'
+											)}
 									>
-										{editingLayerIndex === i && editingOp === 'subtract'
+										{editingLayerIndex === i && editingOp === 'subtract' && editingTool === 'sam'
 											? 'Editing…'
 											: '− Remove area'}
+									</button>
+									<button
+										class="add-override-btn brush"
+										onclick={() => enterBrush(i)}
+										disabled={editingLayerIndex !== null &&
+											!(editingLayerIndex === i && editingTool === 'brush')}
+									>
+										{editingLayerIndex === i && editingTool === 'brush'
+											? 'Editing…'
+											: '✎ Brush mask'}
 									</button>
 								</div>
 							</div>
 						{/each}
 					</div>
 
-					{#if editingLayerIndex !== null}
+					{#if editingLayerIndex !== null && editingTool === 'brush'}
+						<div class="sam-editor brush-editor">
+							<p class="sam-instr">
+								Paint over the part of <strong>Layer {editingLayerIndex + 1}</strong> you want to reassign,
+								then pick the destination mask below. Painting into the same layer just extends it.
+							</p>
+							<div class="dest-row" role="radiogroup" aria-label="Destination layer">
+								<span class="dest-label">Reassign to:</span>
+								{#each Array.from({ length: layers.length }, (_, t) => t) as t (t)}
+									<button
+										class="dest-btn"
+										class:active={editingTarget === t}
+										role="radio"
+										aria-checked={editingTarget === t}
+										onclick={() => (editingTarget = t)}
+									>
+										L{t + 1}{#if t === editingLayerIndex}
+											<span class="dest-dir">this</span>
+										{:else if t < editingLayerIndex}
+											<span class="dest-dir">↓ farther</span>
+										{:else}
+											<span class="dest-dir">↑ nearer</span>
+										{/if}
+									</button>
+								{/each}
+							</div>
+							{#if originalImageUrl}
+								<BrushPicker
+									imageUrl={originalImageUrl}
+									maskWidth={depthW}
+									maskHeight={depthH}
+									referenceMask={brushReference}
+									onChange={handleBrushChange}
+									bind:brushSize
+									bind:edgeRadius={objectEdgeRadius}
+									bind:edgeMode={objectEdgeMode}
+									maxEdge={MAX_EDGE}
+									overlayColor={editingTarget === editingLayerIndex
+										? '255, 105, 180'
+										: '120, 90, 255'}
+								/>
+							{/if}
+							<div class="sam-actions">
+								{#if pendingMask}
+									<ActionButton onClick={acceptOverride} variant="success">
+										{#if editingTarget === editingLayerIndex}
+											Add to layer {editingTarget + 1}
+										{:else}
+											Move to layer {editingTarget + 1}
+										{/if}
+									</ActionButton>
+								{/if}
+								<button class="link-btn" onclick={cancelEdit}>Cancel</button>
+							</div>
+						</div>
+					{:else if editingLayerIndex !== null}
 						<div class="sam-editor">
 							{#if samStatus === 'loading'}
 								<p>Loading segmentation model… {samLoadProgress}%</p>
@@ -1401,6 +1524,9 @@
 	.override-chip.subtract {
 		background: #ff6b6b;
 	}
+	.override-chip.paint {
+		background: #b69bff;
+	}
 	.chip-remove {
 		background: none;
 		border: none;
@@ -1426,6 +1552,9 @@
 	.add-override-btn.subtract {
 		background: #ff6b6b;
 	}
+	.add-override-btn.brush {
+		background: #b69bff;
+	}
 	.override-actions {
 		display: flex;
 		gap: 0.4rem;
@@ -1448,6 +1577,46 @@
 	.sam-instr {
 		font-weight: 600;
 		margin: 0 0 0.75rem;
+	}
+	.brush-editor {
+		border-color: #7a5aff;
+	}
+	.dest-row {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		flex-wrap: wrap;
+		margin: 0 0 0.75rem;
+	}
+	.dest-label {
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		font-size: 0.8rem;
+	}
+	.dest-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		padding: 0.3rem 0.55rem;
+		background: #f0f0f0;
+		border: 2px solid #000;
+		font-weight: 700;
+		font-size: 0.8rem;
+		cursor: pointer;
+		font-family: inherit;
+	}
+	.dest-btn.active {
+		background: #b69bff;
+	}
+	.dest-dir {
+		font-size: 0.65rem;
+		font-weight: 600;
+		color: #555;
+		text-transform: lowercase;
+	}
+	.dest-btn.active .dest-dir {
+		color: #000;
 	}
 	.sam-error {
 		color: #800;
